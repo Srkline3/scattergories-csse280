@@ -3,7 +3,7 @@ body {
 }
 
 .navbar {
-    background-color: #800000;
+    background-color: #673AB7;
     color: white;
 }
 
@@ -11,3 +11,32 @@ body {
     margin-top: 75px;
 }
 
+.buttonActive {
+    background-color: #673AB7;
+    color: white;
+    text-align: center;
+}
+
+.our-button-secondary{
+    border: 2px solid #673AB7;
+}
+
+.lobby{
+    display: flex;
+    flex-direction: row;
+}
+
+.lobby > h2 {
+    flex: 3
+}
+
+.lobby > h3 {
+    margin-left: 3em;
+}
+
+.lobby > button {
+    /* flex: 1; */
+    margin-left: 3em;
+    margin-right: 3em;
+    
+}
