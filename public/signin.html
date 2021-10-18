@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
   <link rel="stylesheet" href="styles/bootstrap-material-design.min.css">
-  <link rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/5.0.0/firebase-ui-auth.css" />
   <link rel="stylesheet" href="styles/main.css">
   <title>Scattergories</title>
 </head>
@@ -15,18 +14,25 @@
   <nav class="navbar navbar-dark fixed-top">
     <a class="navbar-brand" href="#">Scattergories</a>
   </nav>
-  <div id="mainPage" class="container page-container">
+  <div id="signinPage" class="container page-container">
     <h1 id="homePageTitle"> Scattergories Game</h1>
     <img id="scattergoriesImage"
       src="https://play-lh.googleusercontent.com/fdg7CSbIxPIFbL9SHfgJpmZgVHXtPZFhidOCvHwIJYzzHJc19xY93FXQzW6wdwGyLpc"
       class="centerImage">
-    <div id="homeBtns">
 
-      <button type="button" class="btn our-button-active" onClick="location.href='signin.html'">Sign in</button>
-      <button type="button" class="btn our-button-active" onClick="location.href='signup.html'">Sign up</button>
-     
+    <div class="form-group">
+      <label for="inputEmail" class="bmd-label-floating">Email</label>
+      <input type="email" class="form-control" id="inputEmail">
     </div>
-    <div id="firebaseui-auth-container"></div>
+    <div class="form-group">
+      <label for="inputPassword" class="bmd-label-floating">Password</label>
+      <input type="password" class="form-control" id="inputPassword">
+    </div>
+    <div class="centerBtn">
+      <button type="button" class="btn our-button-active" id="signinBtn">Sign in</button>
+
+    </div>
+
   </div>
   <script src="scripts/jquery.min.js"></script>
   <script src="scripts/popper.js"></script>
@@ -39,7 +45,6 @@
   <script src="/__/firebase/7.18.0/firebase-auth.js"></script>
   <script src="/__/firebase/7.18.0/firebase-firestore.js"></script>
   <script src="/__/firebase/init.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/ui/5.0.0/firebase-ui-auth.js"></script>
   <script src="scripts/main.js"></script>
 </body>
 

@@ -56,3 +56,31 @@ body {
     bottom: 10%;
     right: 45%;
 }
+
+#homePageTitle{
+    text-align: center;
+}
+.centerImage {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+  }
+
+#mainPage{
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
+}
+
+#homeBtns{
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    align-items: center;
+    margin-top: 2em;
+}
+
+.centerBtn{
+    text-align: center;
+}
