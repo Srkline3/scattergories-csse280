@@ -15,23 +15,30 @@
     <a class="navbar-brand" href="#">Scattergories</a>
   </nav>
   <div id="lobbySelectPage" class="container page-container">
+	<div id="lobbySearch" class="input-group rounded">
+		<input type="search" class="form-control rounded" placeholder="Search for a lobby" aria-label="Search"
+		aria-describedby="search-addon" />
+		<span class="input-group-text border-0" id="search-addon">
+		  <i class="fas fa-search"></i>
+		</span>
+	</div>
     <h1>Join Lobby</h1>
 	<div id="lobbies" class="overflow-auto">
-		<hr>
+		<!-- <hr> -->
 		<div class ="lobby">
 			<h2>Trey's Cool Lobby</h2>
 			<h3>3/6</h3>
 			<button type="button" class="btn our-button-secondary">Join</button>
 		</div>
-		<hr>
+		<!-- <hr> -->
 		<div class ="lobby">
 			<h2>Shannon's Awesome Lobby</h2>
 			<h3>2/6</h3>
 			<button type="button" class="btn our-button-secondary">Join</button>
 		</div>
-		<hr>
+		<!-- <hr> -->
 	</div>
-	<button type="button" class="btn buttonActive">
+	<button type="button" id="createLobbyButton" class="btn our-button-active">
 		<!-- <span class="material-icons">add</span> -->
 		Create Lobby
 	</button>

@@ -11,7 +11,7 @@ body {
     margin-top: 75px;
 }
 
-.buttonActive {
+.our-button-active {
     background-color: #673AB7;
     color: white;
     text-align: center;
@@ -24,6 +24,7 @@ body {
 .lobby{
     display: flex;
     flex-direction: row;
+    margin-bottom: 2em;
 }
 
 .lobby > h2 {
@@ -39,4 +40,19 @@ body {
     margin-left: 3em;
     margin-right: 3em;
     
+}
+
+#lobbySearch{
+    margin-top: 1em;
+    margin-bottom: 2em;
+}
+
+#lobbySelectPage > h1 {
+    margin-bottom: 1em;
+}
+
+#createLobbyButton{
+    position: fixed;
+    bottom: 10%;
+    right: 45%;
 }
