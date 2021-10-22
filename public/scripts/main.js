@@ -3,29 +3,52 @@
  * Provides the JavaScript interactions for all pages.
  *
  * @author 
- * PUT_YOUR_NAME_HERE
+ * Shannon Jin, Trey Kline
  */
 
 /** namespace. */
 var rhit = rhit || {};
 
-/** globals */
-rhit.variableName = "";
+/** LOBBY CODE. */
+rhit.LobbyController = class{
+  constructor(){
+    //Initialize listeners
 
-/** function and class syntax examples */
-rhit.functionName = function () {
-	/** function body */
-};
+    //Listen for updates
+  }
 
-rhit.ClassName = class {
-	constructor() {
+  updateView(){
 
-	}
+  }
 
-	methodName() {
-
-	}
 }
+
+rhit.LobbyModel = class{
+  constructor(){
+    //Set lobby data
+    
+  }
+
+  getLobbySettings(){
+
+  }
+}
+
+rhit.FbLobbyManager = class{
+  constructor(){
+    //Init firesture ref
+  }
+  newLobby(){}
+  beginListening(){}
+  stopListening(){}
+  addPlayerToLobby(){}
+  deleteLobby(){}
+  getLobbyById(){}
+  searchLobbiesByName(){}
+
+}
+
+
 
 /* Main */
 /** function and class syntax examples */
