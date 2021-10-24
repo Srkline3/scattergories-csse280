@@ -255,6 +255,15 @@ rhit.FbLobbyManager = class {
 
 }
 
+rhit.checkForRedirects = function () {
+	if (document.querySelector("#signinPage") && rhit.authManager.isSignedIn) {
+		window.location.href = "/lobbyselect.html";
+	}
+	if (!document.querySelector("#signinPage")&&!document.querySelector("#signupPage") && !rhit.authManager.isSignedIn) {
+		window.location.href = "/";
+	}
+};
+
 rhit.initializePage = function () {
   if (document.getElementById("signinPage") || document.getElementById("signupPage")) {
     console.log("you are try to sign in or sign up");
@@ -264,6 +273,8 @@ rhit.initializePage = function () {
     document.querySelector("#signOutBtn").onclick = (event) => {
       rhit.authManager.signOut();
     }
+  }  if (document.getElementById("lobbySelectPage")) {
+    rhit.lobbyPageInit();
   }
  
   
@@ -279,7 +290,7 @@ rhit.main = function () {
   rhit.authManager.beginListening(() => {
     console.log("auth change callback");
     // check for regirects
-    // rhit.checkForRedirects();
+    rhit.checkForRedirects();
 
     //page initalization
     rhit.initializePage();
@@ -288,9 +299,7 @@ rhit.main = function () {
 
 
 
-  if (document.getElementById("lobbySelectPage")) {
-    rhit.lobbyPageInit();
-  }
+
 
 };
 
