@@ -295,12 +295,6 @@ rhit.main = function () {
     //page initalization
     rhit.initializePage();
   })
-
-
-
-
-
-
 };
 
 rhit.startFirebaseUI = function () {
