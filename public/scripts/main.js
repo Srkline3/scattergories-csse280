@@ -35,15 +35,15 @@ rhit.AuthPageController = class {
   constructor() {
     const inputEmailEl = document.querySelector("#inputEmail");
     const inputPasswordEl = document.querySelector("#inputPassword");
-    if(document.getElementById("signinPage")){
+    if (document.getElementById("signinPage")) {
       document.querySelector("#signinBtn").onclick = (event) => {
         rhit.authManager.signIn(inputEmailEl.value, inputPasswordEl.value);
       }
-    }else{
+    } else {
       document.querySelector("#signupBtn").onclick = (event) => {
         const inputAvatatEl = document.querySelector("#inputAvatar");
         console.log("are you try to sign up?");
-  
+
         rhit.authManager.signUp(inputEmailEl.value, inputPasswordEl.value, inputAvatatEl.value);
       }
     }
@@ -62,17 +62,17 @@ rhit.AuthManager = class {
       changeListener();
       console.log("who is logg in now: ", this._user);
       // console.log("This user signed in", user.uid);
-			// console.log('displayName :>> ', displayName);
+      // console.log('displayName :>> ', displayName);
     });
   }
 
   signIn(email, password) {
     firebase.auth().signInWithEmailAndPassword(email, password)
-    .catch((error) => {
-      var errorCode = error.code;
-      var errorMessage = error.message;
-      console.log("create account error,", errorCode, errorMessage);
-    });
+      .catch((error) => {
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        console.log("create account error,", errorCode, errorMessage);
+      });
 
   }
 
@@ -101,10 +101,10 @@ rhit.AuthManager = class {
   }
 
   signOut() {
-		firebase.auth().signOut().catch((error) => {
-			console.log("sign out error");
-		});
-	}
+    firebase.auth().signOut().catch((error) => {
+      console.log("sign out error");
+    });
+  }
 
   get uid() {
     return this._user.uid;
@@ -124,6 +124,20 @@ rhit.LobbyController = class {
       const searchString = document.getElementById("searchInput").value;
       rhit.fbLobbyManager.setFilterString(searchString);
       this.updateView();
+    });
+
+    document.getElementById("submitNewLobby").onclick = (event) => {
+      const name = document.getElementById("inputLobbyName");
+      const maxPlayers = parseInt(document.getElementById("inputMaxPlayers"));
+    }
+
+    $('#createLobbyModal').on("show.bs.modal", (event) => {
+      const quote = document.querySelector("#inputLobbyName").value = rhit.fbSingleQuoteManager.quote;
+      const movie = document.querySelector("#inputMaxPlayers").value = rhit.fbSingleQuoteManager.movie;
+    });
+
+    $('#createLobbyModal').on("shown.bs.modal", (event) => {
+      const quote = document.querySelector("#inputLobbyName").focus();
     });
 
     //Listen for updates
@@ -153,6 +167,11 @@ rhit.LobbyController = class {
       document.getElementById(`lobButt${lob.lobbyId}`).onclick = (event) => {
         console.log("You joined: ", lob.lobbyId);
         //TODO: Code for joining lobby
+
+        //insert into player array
+
+        //redirect
+        window.location.href = `/lobby.html?lobby=${lob.lobbyId}`
 
       }
     }
@@ -231,7 +250,10 @@ rhit.FbLobbyManager = class {
 
   }
 
-  newLobby() {}
+  newLobby(name, maxPlayers, numRounds, lists) {
+
+  }
+
   beginListening(changeListener) {
     // console.log("ref:", this._ref);
     this._unsub = this._ref.onSnapshot((querySnapshot) => {
@@ -244,24 +266,24 @@ rhit.FbLobbyManager = class {
   stopListening() {
     this._unsub();
   }
-  addPlayerToLobby() {}
-  deleteLobby() {}
+  addPlayerToLobby() { }
+  deleteLobby() { }
   getLobbyAtIndex(index) {
     const docSnap = this._documentSnapshots[index];
     const lob = new rhit.LobbyModel(docSnap.id, docSnap.get("MaxPlayers"), docSnap.get("NumRounds"), docSnap.get("TimeforRound"), docSnap.get("Players"), docSnap.get("Lists"), docSnap.get("CurrentGame"), docSnap.get("Name"));
     return lob;
   }
-  searchLobbiesByName() {}
+  searchLobbiesByName() { }
 
 }
 
 rhit.checkForRedirects = function () {
-	if ((document.querySelector("#signinPage") ||document.querySelector("#signupPage"))&& rhit.authManager.isSignedIn) {
-		window.location.href = "/lobbyselect.html";
-	}
-	if (!document.querySelector("#signinPage")&&!document.querySelector("#signupPage") && !rhit.authManager.isSignedIn) {
-		window.location.href = "/";
-	}
+  if ((document.querySelector("#signinPage") || document.querySelector("#signupPage")) && rhit.authManager.isSignedIn) {
+    window.location.href = "/lobbyselect.html";
+  }
+  if (!(document.querySelector("#mainPage") || document.querySelector("#signinPage") || !document.querySelector("#signupPage")) && !rhit.authManager.isSignedIn) {
+    window.location.href = "/";
+  }
 };
 
 rhit.initializePage = function () {
@@ -269,15 +291,13 @@ rhit.initializePage = function () {
     console.log("you are try to sign in or sign up");
     new rhit.AuthPageController();
   }
-  if(document.getElementById("mainPage")){
+  if (document.getElementById("mainPage")) {
     document.querySelector("#signOutBtn").onclick = (event) => {
       rhit.authManager.signOut();
     }
-  }  if (document.getElementById("lobbySelectPage")) {
+  } if (document.getElementById("lobbySelectPage")) {
     rhit.lobbyPageInit();
   }
- 
-  
 }
 
 /* Main */
