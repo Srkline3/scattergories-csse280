@@ -20,6 +20,8 @@ rhit.FB_KEY_NUMLOSE = "#Lose";
 rhit.FB_KEY_NUMWIN = "#Win";
 rhit.fbLobbyManager = null;
 rhit.authManager = null;
+rhit.fbSingleLobbyManager = null;
+rhit.fbUsersManager = null;
 
 
 /** HELPER FUNCTIONS */
@@ -114,6 +116,33 @@ rhit.AuthManager = class {
   }
 }
 
+/** USERS CODE. */
+rhit.UserModel = class {
+  constructor(userId, username) {
+    this.userId = userId;
+    this.username = username;
+  }
+}
+
+rhit.FbUsersManager = class {
+  constructor() {
+    this._ref = firebase.firestore().collection("Users");
+  }
+
+  getUserInfo(userId) {
+    console.log("Getting:", userId);
+    let userModel;
+    this._ref.doc(userId).get().then((snap) => {
+      console.log("user got:", snap.data());
+   userModel =  new rhit.UserModel(snap.id, snap.get("Username"));
+    });
+
+    
+  }
+}
+
+
+
 
 
 /** LOBBY CODE. */
@@ -125,7 +154,7 @@ rhit.LobbyListController = class {
       rhit.fbLobbyManager.setFilterString(searchString);
       this.updateView();
     });
-   
+
     // document.getElementById("submitAddQuote").onclick = (event) => {
     //   const defaultLists = document.querySelector('#defaultLists');
     //   const myLilsts=document.querySelector('#myLists');
@@ -180,7 +209,6 @@ rhit.LobbyListController = class {
       document.getElementById(`lobButt${lob.lobbyId}`).onclick = (event) => {
         console.log("You joined: ", lob.lobbyId);
         window.location.href = `/lobby.html?lobby=${lob.lobbyId}`
-
       }
     }
 
@@ -284,6 +312,56 @@ rhit.FbLobbyManager = class {
 
 }
 
+
+rhit.LobbyController = class {
+  constructor() {
+    rhit.fbSingleLobbyManager.beginListening(this.updateView.bind(this));
+  }
+  updateView() {
+    const players = rhit.fbSingleLobbyManager.players;
+    console.log("Players:", players);
+    players.forEach((player) => {
+      const playerModel = rhit.fbUsersManager.getUserInfo(player);
+      console.log("Player Info:", playerModel);
+    });
+  }
+}
+
+rhit.FbSingleLobbyManager = class {
+  constructor(lobbyId) {
+    //Set up instance vars
+    this.lobbyId = lobbyId;
+    this._documentSnapshot = {};
+    this._unsub = null;
+    this._ref = firebase.firestore().collection("Lobbies").doc(lobbyId);
+
+    //Insert Current User into lobby
+    this._ref.update({
+      Players: firebase.firestore.FieldValue.arrayUnion(rhit.authManager.uid)
+    });
+  }
+
+  get players() {
+    return this._documentSnapshot.get("Players");
+  }
+
+  beginListening(changeListener) {
+    this._ref.onSnapshot((doc => {
+      if (doc.exists) {
+        this._documentSnapshot = doc;
+        changeListener();
+      } else {
+        //No GOOD
+
+      }
+    }));
+  }
+}
+
+
+
+/** INIT CODE. */
+
 rhit.checkForRedirects = function () {
   if ((document.querySelector("#signinPage") || document.querySelector("#signupPage")) && rhit.authManager.isSignedIn) {
     window.location.href = "/lobbyselect.html";
@@ -303,9 +381,13 @@ rhit.initializePage = function () {
       rhit.authManager.signOut();
     }
   } if (document.getElementById("lobbySelectPage")) {
-    rhit.lobbyPageInit();
+    rhit.lobbySelectInit();
+  } if (document.getElementById("lobbyPage")) {
+    rhit.lobbyInit();
   }
 }
+
+
 
 /* Main */
 /** function and class syntax examples */
@@ -313,6 +395,7 @@ rhit.main = function () {
   console.log("Ready");
   // rhit.startFirebaseUI();
   rhit.authManager = new rhit.AuthManager();
+  rhit.fbUsersManager = new rhit.FbUsersManager();
 
   rhit.authManager.beginListening(() => {
     console.log("auth change callback");
@@ -340,9 +423,15 @@ rhit.startFirebaseUI = function () {
   ui.start('#firebaseui-auth-container', uiConfig);
 }
 
-rhit.lobbyPageInit = function () {
+rhit.lobbySelectInit = function () {
   rhit.fbLobbyManager = new rhit.FbLobbyManager();
   new rhit.LobbyListController();
+}
+
+rhit.lobbyInit = function () {
+  const urlParams = new URLSearchParams(window.location.search)
+  rhit.fbSingleLobbyManager = new rhit.FbSingleLobbyManager(urlParams.get("lobby"));
+  new rhit.LobbyController();
 }
 
 rhit.main();
