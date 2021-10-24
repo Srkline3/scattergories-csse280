@@ -130,7 +130,7 @@ rhit.LobbyController = class {
       const sb = document.querySelector('#defaultLists')
       const selectedValues = [].filter
       .call(sb.options, option => option.selected)
-      .map(option => option.value);
+      .map(option => option.text);
       alert(selectedValues);
     }
 
