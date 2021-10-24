@@ -126,12 +126,17 @@ rhit.LobbyListController = class {
       this.updateView();
     });
    
-    document.getElementById("defaultListSaveBtn").onclick = (event) => {
-      const sb = document.querySelector('#defaultLists')
+    document.getElementById("submitAddQuote").onclick = (event) => {
+      const defaultLists = document.querySelector('#defaultLists');
+      const myLilsts=document.querySelector('#myLists');
       const selectedValues = [].filter
-      .call(sb.options, option => option.selected)
-      .map(option => option.value);
-      alert(selectedValues);
+      .call(defaultLists.options, option => option.selected)
+      .map(option => option.text);
+      const selectedValues2 = [].filter
+      .call(myLilsts.options, option => option.selected)
+      .map(option => option.text);
+
+      alert(selectedValues+selectedValues2);
     }
 
     document.getElementById("submitNewLobby").onclick = (event) => {
