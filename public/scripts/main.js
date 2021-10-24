@@ -131,13 +131,10 @@ rhit.FbUsersManager = class {
 
   getUserInfo(userId) {
     console.log("Getting:", userId);
-    let userModel;
-    this._ref.doc(userId).get().then((snap) => {
-      console.log("user got:", snap.data());
-   userModel =  new rhit.UserModel(snap.id, snap.get("Username"));
+    return this._ref.doc(userId).get().then((snapshot) => {
+      resolve(new rhit.UserModel(snapshot.id, snapshot.get("Username")));
     });
 
-    
   }
 }
 
@@ -345,7 +342,7 @@ rhit.FbSingleLobbyManager = class {
     return this._documentSnapshot.get("Players");
   }
 
-  beginListening(changeListener) {
+  async beginListening(changeListener) {
     this._ref.onSnapshot((doc => {
       if (doc.exists) {
         this._documentSnapshot = doc;
