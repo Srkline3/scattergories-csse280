@@ -117,7 +117,7 @@ rhit.AuthManager = class {
 
 
 /** LOBBY CODE. */
-rhit.LobbyController = class {
+rhit.LobbyListController = class {
   constructor() {
     //Initialize listeners
     document.getElementById("searchForm").addEventListener("submit", (event) => {
@@ -174,11 +174,6 @@ rhit.LobbyController = class {
       const lob = rhit.fbLobbyManager.getLobbyAtIndex(i);
       document.getElementById(`lobButt${lob.lobbyId}`).onclick = (event) => {
         console.log("You joined: ", lob.lobbyId);
-        //TODO: Code for joining lobby
-
-        //insert into player array
-
-        //redirect
         window.location.href = `/lobby.html?lobby=${lob.lobbyId}`
 
       }
@@ -274,7 +269,6 @@ rhit.FbLobbyManager = class {
   stopListening() {
     this._unsub();
   }
-  addPlayerToLobby() { }
   deleteLobby() { }
   getLobbyAtIndex(index) {
     const docSnap = this._documentSnapshots[index];
@@ -343,7 +337,7 @@ rhit.startFirebaseUI = function () {
 
 rhit.lobbyPageInit = function () {
   rhit.fbLobbyManager = new rhit.FbLobbyManager();
-  new rhit.LobbyController();
+  new rhit.LobbyListController();
 }
 
 rhit.main();
