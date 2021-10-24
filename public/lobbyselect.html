@@ -2,59 +2,86 @@
 <html lang="en">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
-  <link rel="stylesheet" href="styles/bootstrap-material-design.min.css">
-  <link rel="stylesheet" href="styles/main.css">
-  <title>Scattergories</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
+	<link rel="stylesheet" href="styles/bootstrap-material-design.min.css">
+	<link rel="stylesheet" href="styles/main.css">
+	<title>Scattergories</title>
 </head>
 
 <body>
-  <nav class="navbar navbar-dark fixed-top">
-    <a class="navbar-brand" href="#">Scattergories</a>
-  </nav>
-  <div id="lobbySelectPage" class="container page-container">
-	<div id="lobbySearch" class="input-group rounded">
-		<input type="search" class="form-control rounded" placeholder="Search for a lobby" aria-label="Search"
-		aria-describedby="search-addon" />
-		<span class="input-group-text border-0" id="search-addon">
-		  <i class="fas fa-search"></i>
-		</span>
-	</div>
-    <h1>Join Lobby</h1>
-	<div id="lobbies" class="overflow-auto">
-		<!-- <hr> -->
-		<div class ="lobby">
-			<h2>Trey's Cool Lobby</h2>
-			<h3>3/6</h3>
-			<button type="button" class="btn our-button-secondary">Join</button>
+	<nav class="navbar navbar-dark fixed-top">
+		<a class="navbar-brand" href="#">Scattergories</a>
+	</nav>
+	<div id="lobbySelectPage" class="container page-container">
+		<form id="searchForm">
+			<div id="lobbySearch" class="input-group rounded">
+				<input id="searchInput" type="search" class="form-control rounded" placeholder="Search for a lobby"
+					aria-label="Search" aria-describedby="search-addon" />
+				<span class="input-group-text border-0" id="search-addon">
+					<i class="fas fa-search"></i>
+				</span>
+			</div>
+		</form>
+		<h1>Join Lobby</h1>
+		<div id="lobbies" class="overflow-auto">
+			<h1>Loading...</h1>
 		</div>
-		<!-- <hr> -->
-		<div class ="lobby">
-			<h2>Shannon's Awesome Lobby</h2>
-			<h3>2/6</h3>
-			<button type="button" class="btn our-button-secondary">Join</button>
-		</div>
-		<!-- <hr> -->
-	</div>
-	<button type="button" id="createLobbyButton" class="btn our-button-active">
-		<!-- <span class="material-icons">add</span> -->
-		Create Lobby
-	</button>
-    
+		<button type="button" id="createLobbyButton" class="btn our-button-active" data-toggle="modal" data-target="#createLobbyModal">
+			<!-- <span class="material-icons">add</span> -->
+			Create Lobby
+		</button>
 
-  </div>
-  <script src="scripts/jquery.min.js"></script>
-  <script src="scripts/popper.js"></script>
-  <script src="scripts/bootstrap-material-design.js"></script>
-  <script>$("body").bootstrapMaterialDesign();</script>
-  <script src="/__/firebase/7.18.0/firebase-app.js"></script>
-  <script src="/__/firebase/7.18.0/firebase-analytics.js"></script>
-  <script src="/__/firebase/7.18.0/firebase-auth.js"></script>
-  <script src="/__/firebase/7.18.0/firebase-firestore.js"></script>
-  <script src="/__/firebase/init.js"></script>
-  <script src="scripts/main.js"></script>
+		<!-- Modal -->
+		<div class="modal fade" id="createLobbyModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="exampleModalLabel">Create Lobby</h5>
+						<button type="button" class="btn-close" data-mdb-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body container">
+						<div class="form-group bmd-form-group">
+							<label for="inputLobbyName" class="bmd-label-floating">Name</label>
+							<input type="text" class="form-control" id="inputLobbyName">
+						</div>
+						<div class="form-group bmd-form-group">
+							<label for="inputMovie" class="bmd-label-floating">Maximum Players</label>
+							<input type="text" class="form-control" id="inputMovie">
+							<span class="bmd-help">What movie is this quote from?</span>
+						</div>
+						<div class="row">
+							<div class="col">
+								<button type="button" class="btn our-button-active">Use Default Lists</button>
+							</div>
+							<div class="col">
+								<button type="button" class="btn our-button-active">Use Custom Lists</button>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">
+							Close
+						</button>
+						<button type="button" id="submitAddQuote" data-dismiss="modal" class="btn btn-primary">Save
+							changes</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+	<script src="scripts/jquery.min.js"></script>
+	<script src="scripts/popper.js"></script>
+	<script src="scripts/bootstrap-material-design.js"></script>
+	<script>$("body").bootstrapMaterialDesign();</script>
+	<script src="/__/firebase/7.18.0/firebase-app.js"></script>
+	<script src="/__/firebase/7.18.0/firebase-analytics.js"></script>
+	<script src="/__/firebase/7.18.0/firebase-auth.js"></script>
+	<script src="/__/firebase/7.18.0/firebase-firestore.js"></script>
+	<script src="/__/firebase/init.js"></script>
+	<script src="scripts/main.js"></script>
 </body>
 
 </html>
