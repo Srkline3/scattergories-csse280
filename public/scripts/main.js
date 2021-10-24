@@ -126,18 +126,18 @@ rhit.LobbyListController = class {
       this.updateView();
     });
    
-    document.getElementById("submitAddQuote").onclick = (event) => {
-      const defaultLists = document.querySelector('#defaultLists');
-      const myLilsts=document.querySelector('#myLists');
-      const selectedValues = [].filter
-      .call(defaultLists.options, option => option.selected)
-      .map(option => option.text);
-      const selectedValues2 = [].filter
-      .call(myLilsts.options, option => option.selected)
-      .map(option => option.text);
+    // document.getElementById("submitAddQuote").onclick = (event) => {
+    //   const defaultLists = document.querySelector('#defaultLists');
+    //   const myLilsts=document.querySelector('#myLists');
+    //   const selectedValues = [].filter
+    //   .call(defaultLists.options, option => option.selected)
+    //   .map(option => option.text);
+    //   const selectedValues2 = [].filter
+    //   .call(myLilsts.options, option => option.selected)
+    //   .map(option => option.text);
 
-      alert(selectedValues+selectedValues2);
-    }
+    //   alert(selectedValues+selectedValues2);
+    // }
 
     document.getElementById("submitNewLobby").onclick = (event) => {
       const name = document.getElementById("inputLobbyName");
