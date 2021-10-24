@@ -10,6 +10,7 @@
 var rhit = rhit || {};
 
 /** SIGNLETON OBJECTS */
+//users collection
 rhit.FB_COLLECTION_USERS = "Users";
 rhit.FB_KEY_USERNAME = "Username";
 rhit.FB_KEY_PASSWORD = "Password";
@@ -18,6 +19,14 @@ rhit.FB_KEY_NUMTIE = "#Tie";
 rhit.FB_KEY_NUMTOTALGAME = "#TotalGame";
 rhit.FB_KEY_NUMLOSE = "#Lose";
 rhit.FB_KEY_NUMWIN = "#Win";
+//lobby collection
+rhit.FB_COLLECTION_LOBBY = "Users";
+rhit.FB_KEY_NAME = "Name";
+rhit.FB_KEY_MAXPLAYERS = "MaxPlayers";
+rhit.FB_KEY_NUMROUNDS = "NumRounds";
+rhit.FB_KEY_PLAYERS = "Players";
+rhit.FB_KEY_TIMEFORROUND = "TimeforRound";
+rhit.FB_KEY_LISTS = "Lists";
 rhit.fbLobbyManager = null;
 rhit.authManager = null;
 
@@ -125,29 +134,32 @@ rhit.LobbyListController = class {
       rhit.fbLobbyManager.setFilterString(searchString);
       this.updateView();
     });
-   
-    // document.getElementById("submitAddQuote").onclick = (event) => {
-    //   const defaultLists = document.querySelector('#defaultLists');
-    //   const myLilsts=document.querySelector('#myLists');
-    //   const selectedValues = [].filter
-    //   .call(defaultLists.options, option => option.selected)
-    //   .map(option => option.text);
-    //   const selectedValues2 = [].filter
-    //   .call(myLilsts.options, option => option.selected)
-    //   .map(option => option.text);
-
-    //   alert(selectedValues+selectedValues2);
-    // }
 
     document.getElementById("submitNewLobby").onclick = (event) => {
-      const name = document.getElementById("inputLobbyName");
-      const maxPlayers = parseInt(document.getElementById("inputMaxPlayers"));
-    }
+      const name = document.getElementById("inputLobbyName").value;
+      const maxPlayers = parseInt(document.getElementById("inputMaxPlayers").options[document.getElementById("inputMaxPlayers").selectedIndex].text);
 
-    $('#createLobbyModal').on("show.bs.modal", (event) => {
-      const quote = document.querySelector("#inputLobbyName").value = rhit.fbSingleQuoteManager.quote;
-      const movie = document.querySelector("#inputMaxPlayers").value = rhit.fbSingleQuoteManager.movie;
-    });
+      const numRounds = parseInt(document.getElementById("numRounds").options[document.getElementById("numRounds").selectedIndex].text);
+      const roundTime = parseInt(document.getElementById("roundTime").options[document.getElementById("roundTime").selectedIndex].value);
+      const defaultLists = document.querySelector('#defaultLists');
+      const myLilsts = document.querySelector('#myLists');
+      const selectedValues = [].filter
+        .call(defaultLists.options, option => option.selected)
+        .map(option => option.text);
+      const selectedValues2 = [].filter
+        .call(myLilsts.options, option => option.selected)
+        .map(option => option.text);
+
+      const lists = Object.values(selectedValues).concat(Object.values(selectedValues2));
+      console.log("here is name ", name);
+      console.log("here is the max players", maxPlayers);
+      console.log("here is the number rounds", numRounds);
+      console.log("here is roundTime", roundTime);
+     
+      console.log("here is the list", Object.values(selectedValues).concat(Object.values(selectedValues2)));
+
+      rhit.fbLobbyManager.newLobby(name,maxPlayers,numRounds,roundTime,lists);
+    }
 
     $('#createLobbyModal').on("shown.bs.modal", (event) => {
       const quote = document.querySelector("#inputLobbyName").focus();
@@ -258,8 +270,22 @@ rhit.FbLobbyManager = class {
 
   }
 
-  newLobby(name, maxPlayers, numRounds, lists) {
-
+  newLobby(name, maxPlayers, numRounds, roundTime, lists) {
+    console.log("create lobby...");
+    
+    this._ref.add({
+        [rhit.FB_KEY_NAME]: name,
+        [rhit.FB_KEY_MAXPLAYERS]: maxPlayers,
+        [rhit.FB_KEY_NUMROUNDS]: numRounds,
+        [rhit.FB_KEY_TIMEFORROUND]: roundTime,
+        [rhit.FB_KEY_PLAYERS]: [rhit.authManager.uid],
+        [rhit.FB_KEY_LISTS]: lists
+      }).then((docRef) => {
+        console.log("Document written with ID: ", docRef.id);
+      })
+      .catch((error) => {
+        console.error("Error adding document: ", error);
+      });
   }
 
   beginListening(changeListener) {
@@ -274,13 +300,13 @@ rhit.FbLobbyManager = class {
   stopListening() {
     this._unsub();
   }
-  deleteLobby() { }
+  deleteLobby() {}
   getLobbyAtIndex(index) {
     const docSnap = this._documentSnapshots[index];
     const lob = new rhit.LobbyModel(docSnap.id, docSnap.get("MaxPlayers"), docSnap.get("NumRounds"), docSnap.get("TimeforRound"), docSnap.get("Players"), docSnap.get("Lists"), docSnap.get("CurrentGame"), docSnap.get("Name"));
     return lob;
   }
-  searchLobbiesByName() { }
+  searchLobbiesByName() {}
 
 }
 
@@ -302,7 +328,8 @@ rhit.initializePage = function () {
     document.querySelector("#signOutBtn").onclick = (event) => {
       rhit.authManager.signOut();
     }
-  } if (document.getElementById("lobbySelectPage")) {
+  }
+  if (document.getElementById("lobbySelectPage")) {
     rhit.lobbyPageInit();
   }
 }
