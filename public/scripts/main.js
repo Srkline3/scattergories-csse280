@@ -125,6 +125,14 @@ rhit.LobbyController = class {
       rhit.fbLobbyManager.setFilterString(searchString);
       this.updateView();
     });
+   
+    document.getElementById("defaultListSaveBtn").onclick = (event) => {
+      const sb = document.querySelector('#defaultLists')
+      const selectedValues = [].filter
+      .call(sb.options, option => option.selected)
+      .map(option => option.value);
+      alert(selectedValues);
+    }
 
     document.getElementById("submitNewLobby").onclick = (event) => {
       const name = document.getElementById("inputLobbyName");
