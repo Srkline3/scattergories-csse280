@@ -256,7 +256,7 @@ rhit.FbLobbyManager = class {
 }
 
 rhit.checkForRedirects = function () {
-	if (document.querySelector("#signinPage") && rhit.authManager.isSignedIn) {
+	if ((document.querySelector("#signinPage") ||document.querySelector("#signupPage"))&& rhit.authManager.isSignedIn) {
 		window.location.href = "/lobbyselect.html";
 	}
 	if (!document.querySelector("#signinPage")&&!document.querySelector("#signupPage") && !rhit.authManager.isSignedIn) {
