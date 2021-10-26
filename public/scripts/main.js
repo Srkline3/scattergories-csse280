@@ -89,7 +89,8 @@ rhit.AuthManager = class {
 
   signUp(email, password, avatar) {
     firebase.auth().createUserWithEmailAndPassword(email, password)
-      .then(create => {
+      .then((create) => {
+        console.log("Create User Id: ", create.user.uid);
         this._ref.doc(create.user.uid)
           .set({
             [rhit.FB_KEY_USERNAME]: email,
@@ -141,7 +142,7 @@ rhit.FbUsersManager = class {
   getUserInfo(userId) {
     console.log("Getting:", userId);
     return this._ref.doc(userId).get().then((snapshot) => {
-      resolve(new rhit.UserModel(snapshot.id, snapshot.get("Username")));
+      return new rhit.UserModel(snapshot.id, snapshot.get("Username"));
     });
 
   }
@@ -339,13 +340,20 @@ rhit.FbLobbyManager = class {
 rhit.LobbyController = class {
   constructor() {
     rhit.fbSingleLobbyManager.beginListening(this.updateView.bind(this));
+
+    //Listener to kick player from the lobby if they leave the page
+    window.onunload(() =>{
+      //TODO
+    });
   }
   updateView() {
     const players = rhit.fbSingleLobbyManager.players;
     console.log("Players:", players);
     players.forEach((player) => {
-      const playerModel = rhit.fbUsersManager.getUserInfo(player);
-      console.log("Player Info:", playerModel);
+      rhit.fbUsersManager.getUserInfo(player).then((playerModel) =>{
+        console.log("Player Info:", playerModel);
+      });
+      
     });
   }
 }
@@ -387,9 +395,11 @@ rhit.FbSingleLobbyManager = class {
 
 rhit.checkForRedirects = function () {
   if ((document.querySelector("#signinPage") || document.querySelector("#signupPage")) && rhit.authManager.isSignedIn) {
+    
     window.location.href = "/lobbyselect.html";
   }
-  if (!(document.querySelector("#mainPage") || document.querySelector("#signinPage") || !document.querySelector("#signupPage")) && !rhit.authManager.isSignedIn) {
+  if (!(document.querySelector("#mainPage") || document.querySelector("#signinPage") || document.querySelector("#signupPage")) && !rhit.authManager.isSignedIn) {
+    console.log("aefkaj;eiofja;eiofjae'iofajefaEGAEOGJZGJAAE:ROGJAEAE:AJE:RKOGARLGKALLRG");
     window.location.href = "/";
   }
 };
@@ -408,6 +418,9 @@ rhit.initializePage = function () {
   } if (document.getElementById("lobbyPage")) {
     rhit.lobbyInit();
   }
+
+
+
 }
 
 
@@ -423,7 +436,7 @@ rhit.main = function () {
   rhit.authManager.beginListening(() => {
     console.log("auth change callback");
     // check for regirects
-    rhit.checkForRedirects();
+    // rhit.checkForRedirects();
 
     //page initalization
     rhit.initializePage();
