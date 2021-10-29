@@ -32,6 +32,7 @@ rhit.fbLobbyManager = null;
 rhit.authManager = null;
 rhit.fbSingleLobbyManager = null;
 rhit.fbUsersManager = null;
+rhit.fbListsManager = null;
 
 
 /** HELPER FUNCTIONS */
@@ -109,7 +110,7 @@ rhit.AuthManager = class {
       avatar: avatar,
       username: username
     };
-    
+
     console.log("User needs account:", this._userNeedsAccount);
 
     firebase.auth().createUserWithEmailAndPassword(email, password)
@@ -193,12 +194,18 @@ rhit.FbUsersManager = class {
 /** LOBBY CODE. */
 rhit.LobbyListController = class {
   constructor() {
-    //Initialize listeners
-    document.getElementById("searchForm").addEventListener("submit", (event) => {
-      const searchString = document.getElementById("searchInput").value;
-      rhit.fbLobbyManager.setFilterString(searchString);
-      this.updateView();
+    document.getElementById("searchInput").addEventListener("keyup", (event) => {
+      if(event.code === "Enter"){
+        console.log("I pressed enter!")
+
+        const searchString = document.getElementById("searchInput").value;
+        rhit.fbLobbyManager.setFilterString(searchString);
+        this.updateView();
+      }
+
     });
+
+    rhit.fbListsManager.beginListening(this.updateModal.bind(this));
 
     document.getElementById("submitNewLobby").onclick = (event) => {
       const name = document.getElementById("inputLobbyName").value;
@@ -210,10 +217,10 @@ rhit.LobbyListController = class {
       const myLilsts = document.querySelector('#myLists');
       const selectedValues = [].filter
         .call(defaultLists.options, option => option.selected)
-        .map(option => option.text);
+        .map(option => option.value);
       const selectedValues2 = [].filter
         .call(myLilsts.options, option => option.selected)
-        .map(option => option.text);
+        .map(option => option.value);
 
       const lists = Object.values(selectedValues).concat(Object.values(selectedValues2));
       console.log("here is name ", name);
@@ -263,8 +270,36 @@ rhit.LobbyListController = class {
         window.location.href = `/lobby.html?lobby=${lob.lobbyId}`
       }
     }
+  }
 
+  updateModal(){
+    const customLists = rhit.fbListsManager.customLists;
+    const defaultLists = rhit.fbListsManager.defaultLists;
 
+    let newMyLists = htmlToElement('<select id="myLists" multiple></select>');
+    let newDefaultLists = htmlToElement('<select id="defaultLists" multiple></select>');
+
+    customLists.forEach((list) =>{
+      const listHMTL = htmlToElement(`<option value="${list.id}">${list.name}</option>`);
+      newMyLists.appendChild(listHMTL);
+    });
+
+    defaultLists.forEach((list) =>{
+      const listHMTL = htmlToElement(`<option value="${list.id}">${list.name}</option>`);
+      newDefaultLists.appendChild(listHMTL);
+    });
+
+    const oldMyLists = document.getElementById("myLists");
+    const oldDefaultLists = document.getElementById("defaultLists");
+
+    oldMyLists.removeAttribute("id");
+    oldDefaultLists.removeAttribute("id");
+
+    oldMyLists.hidden = true;
+    oldDefaultLists.hidden = true;
+
+    oldMyLists.parentElement.appendChild(newMyLists);
+    oldDefaultLists.parentElement.appendChild(newDefaultLists);
   }
 
   createJoinLobby(lobby) {
@@ -466,6 +501,60 @@ rhit.FbSingleLobbyManager = class {
 }
 
 
+/** List CODE. */
+rhit.ListModel = class{
+  constructor(id, name, owner, categories, isPublic){
+    this.id = id;
+    this.name = name;
+    this.owner = owner; 
+    this.categories = categories;
+    this.isPublic = isPublic;
+  }
+}
+
+
+rhit.FbListsManager = class{
+  constructor(){
+    this._documentSnapshots = [];
+    this._ref = firebase.firestore().collection("Lists");
+    this._unsub = null;
+  }
+
+  beginListening(changeListener) {
+    this._unsub = this._ref.onSnapshot((qs) =>{
+      this._documentSnapshots = qs.docs;
+      changeListener();
+    });
+  }
+
+  get customLists(){
+    let lists = [];
+    this._documentSnapshots.forEach((snap) =>{
+      lists.push(new rhit.ListModel(snap.id, snap.get("Name"), snap.get("Owner"), snap.get("Categories"), snap.get("public")));
+    });
+
+    console.log("All lists:", lists);
+
+    lists = lists.filter((list) =>{
+      return list.owner == rhit.authManager.uid;
+    });
+
+    return lists;
+  }
+
+  get defaultLists(){
+    let lists = [];
+    this._documentSnapshots.forEach((snap) =>{
+      lists.push(new rhit.ListModel(snap.id, snap.get("Name"), snap.get("Owner"), snap.get("Categories"), snap.get("public")));
+    });
+
+    lists = lists.filter((list) =>{
+      return list.owner == "DEFAULT";
+    });
+
+    return lists;
+  }
+}
 
 /** INIT CODE. */
 
@@ -536,6 +625,7 @@ rhit.startFirebaseUI = function () {
 }
 
 rhit.lobbySelectInit = function () {
+  rhit.fbListsManager = new rhit.FbListsManager();
   rhit.fbLobbyManager = new rhit.FbLobbyManager();
   new rhit.LobbyListController();
 }
