@@ -468,6 +468,10 @@ rhit.FbSingleLobbyManager = class {
     this._ref.update({
       Players: firebase.firestore.FieldValue.arrayUnion(rhit.authManager.uid)
     });
+    document.getElementById("startGameButton").addEventListener("click", (event) => {
+
+      this.startGame();
+    });
   }
 
   get players() {
@@ -497,6 +501,11 @@ rhit.FbSingleLobbyManager = class {
 
       }
     }));
+  }
+
+  startGame(){
+    console.log("here");
+    // create new game manager
   }
 }
 

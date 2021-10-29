@@ -1,0 +1,20 @@
+#resultBtnGroup{
+    text-align: end;
+}
+
+#playersResult, #resultTitle{
+    text-align: center;
+}
+
+.column {
+    float: left;
+    width: 50%;
+    font-size: 1.5rem;
+  }
+  
+  /* Clear floats after the columns */
+  .row:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
