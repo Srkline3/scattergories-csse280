@@ -182,10 +182,10 @@ rhit.LobbyListController = class {
       console.log("here is the max players", maxPlayers);
       console.log("here is the number rounds", numRounds);
       console.log("here is roundTime", roundTime);
-     
+
       console.log("here is the list", Object.values(selectedValues).concat(Object.values(selectedValues2)));
 
-      rhit.fbLobbyManager.newLobby(name,maxPlayers,numRounds,roundTime,lists);
+      rhit.fbLobbyManager.newLobby(name, maxPlayers, numRounds, roundTime, lists);
     }
 
     $('#createLobbyModal').on("shown.bs.modal", (event) => {
@@ -298,17 +298,17 @@ rhit.FbLobbyManager = class {
 
   newLobby(name, maxPlayers, numRounds, roundTime, lists) {
     console.log("create lobby...");
-    
+
     this._ref.add({
-        [rhit.FB_KEY_NAME]: name,
-        [rhit.FB_KEY_MAXPLAYERS]: maxPlayers,
-        [rhit.FB_KEY_NUMROUNDS]: numRounds,
-        [rhit.FB_KEY_TIMEFORROUND]: roundTime,
-        [rhit.FB_KEY_PLAYERS]: [rhit.authManager.uid],
-        [rhit.FB_KEY_LISTS]: lists
-      }).then((docRef) => {
-        console.log("Document written with ID: ", docRef.id);
-      })
+      [rhit.FB_KEY_NAME]: name,
+      [rhit.FB_KEY_MAXPLAYERS]: maxPlayers,
+      [rhit.FB_KEY_NUMROUNDS]: numRounds,
+      [rhit.FB_KEY_TIMEFORROUND]: roundTime,
+      [rhit.FB_KEY_PLAYERS]: [rhit.authManager.uid],
+      [rhit.FB_KEY_LISTS]: lists
+    }).then((docRef) => {
+      console.log("Document written with ID: ", docRef.id);
+    })
       .catch((error) => {
         console.error("Error adding document: ", error);
       });
@@ -326,13 +326,13 @@ rhit.FbLobbyManager = class {
   stopListening() {
     this._unsub();
   }
-  deleteLobby() {}
+  deleteLobby() { }
   getLobbyAtIndex(index) {
     const docSnap = this._documentSnapshots[index];
     const lob = new rhit.LobbyModel(docSnap.id, docSnap.get("MaxPlayers"), docSnap.get("NumRounds"), docSnap.get("TimeforRound"), docSnap.get("Players"), docSnap.get("Lists"), docSnap.get("CurrentGame"), docSnap.get("Name"));
     return lob;
   }
-  searchLobbiesByName() {}
+  searchLobbiesByName() { }
 
 }
 
@@ -342,19 +342,37 @@ rhit.LobbyController = class {
     rhit.fbSingleLobbyManager.beginListening(this.updateView.bind(this));
 
     //Listener to kick player from the lobby if they leave the page
-    window.onunload(() =>{
-      //TODO
-    });
+    // window.onunload(() =>{
+    //   //TODO
+    // });
   }
   updateView() {
+    document.getElementById("lobbyName").innerHTML = `Lobby: ${rhit.fbSingleLobbyManager.name}`
+    const playerList = htmlToElement('<div id="lobbyPlayers"></div>');
+
     const players = rhit.fbSingleLobbyManager.players;
     console.log("Players:", players);
     players.forEach((player) => {
-      rhit.fbUsersManager.getUserInfo(player).then((playerModel) =>{
+      rhit.fbUsersManager.getUserInfo(player).then((playerModel) => {
         console.log("Player Info:", playerModel);
+        playerList.appendChild(htmlToElement(`<h2>${playerModel.username}</h2>`));
       });
-      
     });
+
+    const oldList = document.getElementById("lobbyPlayers");
+    oldList.removeAttribute("id");
+    oldList.hidden = true;
+    oldList.parentElement.appendChild(playerList);
+
+    console.log(players[0] + " == " + rhit.authManager.uid);
+    if(players[0] == rhit.authManager.uid){
+      console.log("I'm the lobby owner");
+
+      document.getElementById("startGameButton").style.display = "block";
+      document.getElementById("waitingText").style.display = "none";
+    }
+    
+
   }
 }
 
@@ -376,6 +394,10 @@ rhit.FbSingleLobbyManager = class {
     return this._documentSnapshot.get("Players");
   }
 
+  get name() {
+    return this._documentSnapshot.get("Name");
+  }
+
   async beginListening(changeListener) {
     this._ref.onSnapshot((doc => {
       if (doc.exists) {
@@ -395,7 +417,7 @@ rhit.FbSingleLobbyManager = class {
 
 rhit.checkForRedirects = function () {
   if ((document.querySelector("#signinPage") || document.querySelector("#signupPage")) && rhit.authManager.isSignedIn) {
-    
+
     window.location.href = "/lobbyselect.html";
   }
   if (!(document.querySelector("#mainPage") || document.querySelector("#signinPage") || document.querySelector("#signupPage")) && !rhit.authManager.isSignedIn) {
@@ -436,7 +458,7 @@ rhit.main = function () {
   rhit.authManager.beginListening(() => {
     console.log("auth change callback");
     // check for regirects
-    // rhit.checkForRedirects();
+    rhit.checkForRedirects();
 
     //page initalization
     rhit.initializePage();
