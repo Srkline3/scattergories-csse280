@@ -19,6 +19,7 @@ rhit.FB_KEY_NUMTIE = "#Tie";
 rhit.FB_KEY_NUMTOTALGAME = "#TotalGame";
 rhit.FB_KEY_NUMLOSE = "#Lose";
 rhit.FB_KEY_NUMWIN = "#Win";
+rhit.FB_KEY_EMAIL = "Email";
 //lobby collection
 rhit.FB_COLLECTION_LOBBY = "Users";
 rhit.FB_KEY_NAME = "Name";
@@ -46,6 +47,7 @@ rhit.AuthPageController = class {
   constructor() {
     const inputEmailEl = document.querySelector("#inputEmail");
     const inputPasswordEl = document.querySelector("#inputPassword");
+
     if (document.getElementById("signinPage")) {
       document.querySelector("#signinBtn").onclick = (event) => {
         rhit.authManager.signIn(inputEmailEl.value, inputPasswordEl.value);
@@ -53,9 +55,10 @@ rhit.AuthPageController = class {
     } else {
       document.querySelector("#signupBtn").onclick = (event) => {
         const inputAvatatEl = document.querySelector("#inputAvatar");
+        const inputUsernameEl = document.querySelector("#inputUsername");
         console.log("are you try to sign up?");
 
-        rhit.authManager.signUp(inputEmailEl.value, inputPasswordEl.value, inputAvatatEl.value);
+        rhit.authManager.signUp(inputEmailEl.value, inputPasswordEl.value, inputAvatatEl.value, inputUsernameEl.value);
       }
     }
   }
@@ -65,6 +68,7 @@ rhit.AuthManager = class {
   constructor() {
     this._user = null;
     this._ref = firebase.firestore().collection("Users");
+    this._userNeedsAccount = false;
   }
 
   beginListening(changeListener) {
@@ -72,8 +76,20 @@ rhit.AuthManager = class {
       this._user = user;
       changeListener();
       console.log("who is logg in now: ", this._user);
-      // console.log("This user signed in", user.uid);
-      // console.log('displayName :>> ', displayName);
+      if (this._userNeedsAccount) {
+        this._ref.doc(user.uid)
+          .set({
+            [rhit.FB_KEY_USERNAME]: this._userNeedsAccount.username,
+            [rhit.FB_KEY_EMAIL]: this._userNeedsAccount.email,
+            [rhit.FB_KEY_AVATAR]: this._userNeedsAccount.avatar,
+            [rhit.FB_KEY_NUMLOSE]: 0,
+            [rhit.FB_KEY_NUMTIE]: 0,
+            [rhit.FB_KEY_NUMWIN]: 0,
+            [rhit.FB_KEY_NUMTOTALGAME]: 0,
+          });
+        this._userNeedsAccount = false;
+      }
+
     });
   }
 
@@ -87,30 +103,52 @@ rhit.AuthManager = class {
 
   }
 
-  signUp(email, password, avatar) {
+  signUp(email, password, avatar, username) {
+    this._userNeedsAccount = {
+      email: email,
+      avatar: avatar,
+      username: username
+    };
+    
+    console.log("User needs account:", this._userNeedsAccount);
+
     firebase.auth().createUserWithEmailAndPassword(email, password)
       .then((create) => {
-        console.log("Create User Id: ", create.user.uid);
-        this._ref.doc(create.user.uid)
-          .set({
-            [rhit.FB_KEY_USERNAME]: email,
-            [rhit.FB_KEY_PASSWORD]: password,
-            [rhit.FB_KEY_AVATAR]: avatar,
-            [rhit.FB_KEY_NUMLOSE]: 0,
-            [rhit.FB_KEY_NUMTIE]: 0,
-            [rhit.FB_KEY_NUMWIN]: 0,
-            [rhit.FB_KEY_NUMTOTALGAME]: 0,
-          });
+
+        console.log("Create User Id: ", this._userNeedsAccount);
       })
       .catch((error) => {
         var errorCode = error.code;
         var errorMessage = error.message;
         console.log("log in error,", errorCode, errorMessage);
-
       });
-
-
   }
+
+  // signUp(email, password, avatar, username) {
+  //   return firebase.auth().createUserWithEmailAndPassword(email, password)
+  //     .then((create) => {
+  //       console.log("Create User Id: ", create.user.uid);
+  //       this._ref.doc(create.user.uid)
+  //         .set({
+  //           [rhit.FB_KEY_EMAIL]: email,
+  //           [rhit.FB_KEY_USERNAME]: username,
+  //           [rhit.FB_KEY_PASSWORD]: password,
+  //           [rhit.FB_KEY_AVATAR]: avatar,
+  //           [rhit.FB_KEY_NUMLOSE]: 0,
+  //           [rhit.FB_KEY_NUMTIE]: 0,
+  //           [rhit.FB_KEY_NUMWIN]: 0,
+  //           [rhit.FB_KEY_NUMTOTALGAME]: 0,
+  //         }).then((user) =>{
+  //           console.log("Added user the user is:", user);
+  //         });
+  //     })
+  //     .catch((error) => {
+  //       var errorCode = error.code;
+  //       var errorMessage = error.message;
+  //       console.log("log in error,", errorCode, errorMessage);
+
+  //     });
+  // }
 
   signOut() {
     firebase.auth().signOut().catch((error) => {
@@ -185,7 +223,11 @@ rhit.LobbyListController = class {
 
       console.log("here is the list", Object.values(selectedValues).concat(Object.values(selectedValues2)));
 
-      rhit.fbLobbyManager.newLobby(name, maxPlayers, numRounds, roundTime, lists);
+      rhit.fbLobbyManager.newLobby(name, maxPlayers, numRounds, roundTime, lists).then((lobId) => {
+        window.location.href = `/lobby.html?lobby=${lobId}`
+      });
+
+
     }
 
     $('#createLobbyModal').on("shown.bs.modal", (event) => {
@@ -299,7 +341,7 @@ rhit.FbLobbyManager = class {
   newLobby(name, maxPlayers, numRounds, roundTime, lists) {
     console.log("create lobby...");
 
-    this._ref.add({
+    return this._ref.add({
       [rhit.FB_KEY_NAME]: name,
       [rhit.FB_KEY_MAXPLAYERS]: maxPlayers,
       [rhit.FB_KEY_NUMROUNDS]: numRounds,
@@ -308,6 +350,7 @@ rhit.FbLobbyManager = class {
       [rhit.FB_KEY_LISTS]: lists
     }).then((docRef) => {
       console.log("Document written with ID: ", docRef.id);
+      return docRef.id;
     })
       .catch((error) => {
         console.error("Error adding document: ", error);
@@ -342,9 +385,11 @@ rhit.LobbyController = class {
     rhit.fbSingleLobbyManager.beginListening(this.updateView.bind(this));
 
     //Listener to kick player from the lobby if they leave the page
-    // window.onunload(() =>{
-    //   //TODO
-    // });
+
+    //TODO: Add check if they are leaving the page to go to the game page (if so don't kick)
+    window.onbeforeunload = (event) => {
+      rhit.fbSingleLobbyManager.removeCurrentPlayer();
+    }
   }
   updateView() {
     document.getElementById("lobbyName").innerHTML = `Lobby: ${rhit.fbSingleLobbyManager.name}`
@@ -365,13 +410,13 @@ rhit.LobbyController = class {
     oldList.parentElement.appendChild(playerList);
 
     console.log(players[0] + " == " + rhit.authManager.uid);
-    if(players[0] == rhit.authManager.uid){
+    if (players[0] == rhit.authManager.uid) {
       console.log("I'm the lobby owner");
 
       document.getElementById("startGameButton").style.display = "block";
       document.getElementById("waitingText").style.display = "none";
     }
-    
+
 
   }
 }
@@ -396,6 +441,15 @@ rhit.FbSingleLobbyManager = class {
 
   get name() {
     return this._documentSnapshot.get("Name");
+  }
+
+  removeCurrentPlayer() {
+    this._ref.update({
+      Players: firebase.firestore.FieldValue.arrayRemove(rhit.authManager.uid)
+    });
+
+    //Add code to delete lobby if the last player leaves ! ? !? !
+
   }
 
   async beginListening(changeListener) {
