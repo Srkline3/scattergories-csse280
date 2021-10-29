@@ -100,7 +100,7 @@ rhit.AuthManager = class {
             [rhit.FB_KEY_NUMTIE]: 0,
             [rhit.FB_KEY_NUMWIN]: 0,
             [rhit.FB_KEY_NUMTOTALGAME]: 0,
-          });
+          });      
       })
       .catch((error) => {
         var errorCode = error.code;
@@ -388,6 +388,10 @@ rhit.FbSingleLobbyManager = class {
     this._ref.update({
       Players: firebase.firestore.FieldValue.arrayUnion(rhit.authManager.uid)
     });
+    document.getElementById("startGameButton").addEventListener("click", (event) => {
+
+      this.startGame();
+    });
   }
 
   get players() {
@@ -408,6 +412,11 @@ rhit.FbSingleLobbyManager = class {
 
       }
     }));
+  }
+
+  startGame(){
+    console.log("here");
+    // create new game manager
   }
 }
 

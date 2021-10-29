@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
+    <link rel="stylesheet" href="styles/bootstrap-material-design.min.css">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/dropdown.css">
+
+    <title>Scattergories</title>
+</head>
+
+<body>
+    <nav class="navbar navbar-dark fixed-top">
+        <a class="navbar-brand" href="#">Scattergories</a>
+    </nav>
+    <div id="gamePage" class="container page-container">
+
+        <div class="dropdown">
+            <button class="dropbtn">Players Info</button>
+            <div class="dropdown-content">
+                <p>link1</p>
+            </div>
+        </div>
+        <div class="gameInfo">
+            <h2>Letter: L</h2>
+            <h2>Timmer: 1:00</h2>
+        </div>
+
+        <!-- refernece : https://www.geeksforgeeks.org/how-to-create-a-form-dynamically-with-the-javascript/?ref=lbp -->
+        <div class="form-group">
+            <label for="inputAnswer" >Cate1</label>
+            <input type="email" class="form-control" id="inputEmail">
+          </div>
+
+    </div>
+    <!-- modal -->
+    <div class="modal fade" id="timesUpModal" tabindex="-1" aria-labelledby="timesUpModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="timesUpModalLabel">Times Up</h5>
+              
+            </div>
+          
+            <div class="modal-footer">
+            
+                <button type="button" id="timesUpBtn" data-dismiss="modal" class="btn btn-primary">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/popper.js"></script>
+    <script src="scripts/bootstrap-material-design.js"></script>
+    <script>$("body").bootstrapMaterialDesign();</script>
+    <script src="/__/firebase/7.18.0/firebase-app.js"></script>
+    <script src="/__/firebase/7.18.0/firebase-analytics.js"></script>
+    <script src="/__/firebase/7.18.0/firebase-auth.js"></script>
+    <script src="/__/firebase/7.18.0/firebase-firestore.js"></script>
+    <script src="/__/firebase/init.js"></script>
+    <script src="scripts/main.js"></script>
+
+</body>
+
+</html>

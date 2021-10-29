@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
+    <link rel="stylesheet" href="styles/bootstrap-material-design.min.css">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/result.css">
+    <title>Scattergories</title>
+</head>
+
+<body>
+    <nav class="navbar navbar-dark fixed-top">
+        <a class="navbar-brand" href="#">Scattergories</a>
+    </nav>
+    <div id="votePage" class="container page-container">
+
+        <h1 id="resultTitle" >You won!</h1>
+        <hr>
+        <div id="playersResult">
+           <div class="row">
+                <div class="column"> Trey:</div>
+                <div class="column">16</div>
+              </div>
+              <div class="row">
+                <div class="column"> Shannon:</div>
+                <div class="column">16</div>
+              </div>
+            </div>
+
+        <div id="resultBtnGroup">
+            <button id="submitVoteBtn" class="btn our-button-active">Play Again</button>
+            <button id="submitVoteBtn" class="btn our-button-active">Exit Lobby</button>
+        </div>
+
+
+    </div>
+    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/popper.js"></script>
+    <script src="scripts/bootstrap-material-design.js"></script>
+    <script>$("body").bootstrapMaterialDesign();</script>
+    <script src="/__/firebase/7.18.0/firebase-app.js"></script>
+    <script src="/__/firebase/7.18.0/firebase-analytics.js"></script>
+    <script src="/__/firebase/7.18.0/firebase-auth.js"></script>
+    <script src="/__/firebase/7.18.0/firebase-firestore.js"></script>
+    <script src="/__/firebase/init.js"></script>
+    <script src="scripts/main.js"></script>
+</body>
+
+</html>
