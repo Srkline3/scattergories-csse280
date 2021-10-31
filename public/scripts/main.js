@@ -591,6 +591,16 @@ rhit.FbGamesManager = class {
       console.error("Error adding document: ", error);
     });
   }
+  beginListening(changeListener) {
+    this._unsub = this._ref.onSnapshot((qs) => {
+      this._documentSnapshots = qs.docs;
+      
+      changeListener();
+    });
+  }
+  get players(){
+    return game.players;
+  }
 
 }
 rhit.GameController=class{
