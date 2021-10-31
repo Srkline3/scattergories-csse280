@@ -122,3 +122,20 @@ body {
 .bmd-layout-content{
     height: 100vh;
 }
+
+.gameInfo{
+    display: flex;
+    flex-direction: row;
+    align-content: space-between;
+    text-align: center;
+}
+
+.gameplay-header{
+    flex: 1;
+}
+
+#letterText{
+    
+}
+
+
