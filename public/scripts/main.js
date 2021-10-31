@@ -577,16 +577,26 @@ rhit.FbGamesManager = class {
     this._documentSnapshots = [];
     this._ref = firebase.firestore().collection("Games");
     this._unsub = null;
+    this._timer= null;
   }
 
   addGame(game) {
+    let assignScores = game.players.reduce(function (allPlayers, player) {
+     
+      allPlayers[player] = 0
+    
+    return allPlayers;
+  }, {});
+  console.log(assignScores, "here is the socre")
     return this._ref.add({
       Players: game.players,
       DoneVoting: game.doneVoting,
       GameOver: game.gameOver,
-      RoundOverTime: game.roundOverTime
+      RoundOverTime: game.roundOverTime,
+      Socres:assignScores
     }).then((docRef) => {
       console.log("Document written with ID: ", docRef.id);
+      this._timer=game.roundOverTime;
       return docRef.id;
     }).catch((error) => {
       console.error("Error adding document: ", error);
