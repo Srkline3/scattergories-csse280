@@ -490,6 +490,7 @@ rhit.LobbyController = class {
         document.getElementById("waitingText").style.display = "none";
       }
     }else{
+      window.onbeforeunload = () => {/*do nothing */}
       window.location.href = `/gameMain.html?gameId=${rhit.fbSingleLobbyManager.game}`
     }
 
