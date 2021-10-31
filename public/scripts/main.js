@@ -69,27 +69,43 @@ rhit.AuthManager = class {
   constructor() {
     this._user = null;
     this._ref = firebase.firestore().collection("Users");
-    this._userNeedsAccount = false;
+    this._username = null;
+    this._avatar = null;
   }
 
   beginListening(changeListener) {
     firebase.auth().onAuthStateChanged((user) => {
       this._user = user;
-      changeListener();
-      console.log("who is logg in now: ", this._user);
-      if (this._userNeedsAccount) {
-        this._ref.doc(user.uid)
-          .set({
-            [rhit.FB_KEY_USERNAME]: this._userNeedsAccount.username,
-            [rhit.FB_KEY_EMAIL]: this._userNeedsAccount.email,
-            [rhit.FB_KEY_AVATAR]: this._userNeedsAccount.avatar,
-            [rhit.FB_KEY_NUMLOSE]: 0,
-            [rhit.FB_KEY_NUMTIE]: 0,
-            [rhit.FB_KEY_NUMWIN]: 0,
-            [rhit.FB_KEY_NUMTOTALGAME]: 0,
-          });
-        this._userNeedsAccount = false;
+      if (user) {
+        var docRef = this._ref.doc(user.uid);
+
+        docRef.get().then((doc) => {
+          if (doc.exists) {
+            changeListener();
+            console.log("who is logg in now: ", this._user);
+          } else {
+            // for add a user in the users collection after sign up
+            this._ref.doc(user.uid)
+              .set({
+                [rhit.FB_KEY_EMAIL]: user.email,
+                [rhit.FB_KEY_USERNAME]: this._username,
+                [rhit.FB_KEY_AVATAR]: this._avatar,
+                [rhit.FB_KEY_NUMLOSE]: 0,
+                [rhit.FB_KEY_NUMTIE]: 0,
+                [rhit.FB_KEY_NUMWIN]: 0,
+                [rhit.FB_KEY_NUMTOTALGAME]: 0,
+              }).then((user) => {
+
+                changeListener();
+              });
+          }
+        }).catch((error) => {
+          console.log("Error getting document:", error);
+        });
+      } else {
+        changeListener();
       }
+
 
     });
   }
@@ -104,52 +120,21 @@ rhit.AuthManager = class {
 
   }
 
+
   signUp(email, password, avatar, username) {
-    this._userNeedsAccount = {
-      email: email,
-      avatar: avatar,
-      username: username
-    };
-
-    console.log("User needs account:", this._userNeedsAccount);
-
+    this._avatar = avatar;
+    this._username = username;
     firebase.auth().createUserWithEmailAndPassword(email, password)
-      .then((create) => {
-
-        console.log("Create User Id: ", this._userNeedsAccount);
+      .then(create => {
       })
       .catch((error) => {
         var errorCode = error.code;
         var errorMessage = error.message;
         console.log("log in error,", errorCode, errorMessage);
+
       });
-  }
+  };
 
-  // signUp(email, password, avatar, username) {
-  //   return firebase.auth().createUserWithEmailAndPassword(email, password)
-  //     .then((create) => {
-  //       console.log("Create User Id: ", create.user.uid);
-  //       this._ref.doc(create.user.uid)
-  //         .set({
-  //           [rhit.FB_KEY_EMAIL]: email,
-  //           [rhit.FB_KEY_USERNAME]: username,
-  //           [rhit.FB_KEY_PASSWORD]: password,
-  //           [rhit.FB_KEY_AVATAR]: avatar,
-  //           [rhit.FB_KEY_NUMLOSE]: 0,
-  //           [rhit.FB_KEY_NUMTIE]: 0,
-  //           [rhit.FB_KEY_NUMWIN]: 0,
-  //           [rhit.FB_KEY_NUMTOTALGAME]: 0,
-  //         }).then((user) =>{
-  //           console.log("Added user the user is:", user);
-  //         });
-  //     })
-  //     .catch((error) => {
-  //       var errorCode = error.code;
-  //       var errorMessage = error.message;
-  //       console.log("log in error,", errorCode, errorMessage);
-
-  //     });
-  // }
 
   signOut() {
     firebase.auth().signOut().catch((error) => {
@@ -163,6 +148,7 @@ rhit.AuthManager = class {
   get isSignedIn() {
     return !!this._user;
   }
+
 }
 
 /** USERS CODE. */
@@ -195,7 +181,7 @@ rhit.FbUsersManager = class {
 rhit.LobbyListController = class {
   constructor() {
     document.getElementById("searchInput").addEventListener("keyup", (event) => {
-      if(event.code === "Enter"){
+      if (event.code === "Enter") {
         console.log("I pressed enter!")
 
         const searchString = document.getElementById("searchInput").value;
@@ -272,19 +258,19 @@ rhit.LobbyListController = class {
     }
   }
 
-  updateModal(){
+  updateModal() {
     const customLists = rhit.fbListsManager.customLists;
     const defaultLists = rhit.fbListsManager.defaultLists;
 
     let newMyLists = htmlToElement('<select id="myLists" multiple></select>');
     let newDefaultLists = htmlToElement('<select id="defaultLists" multiple></select>');
 
-    customLists.forEach((list) =>{
+    customLists.forEach((list) => {
       const listHMTL = htmlToElement(`<option value="${list.id}">${list.name}</option>`);
       newMyLists.appendChild(listHMTL);
     });
 
-    defaultLists.forEach((list) =>{
+    defaultLists.forEach((list) => {
       const listHMTL = htmlToElement(`<option value="${list.id}">${list.name}</option>`);
       newDefaultLists.appendChild(listHMTL);
     });
@@ -377,16 +363,16 @@ rhit.FbLobbyManager = class {
     console.log("create lobby...");
 
     return this._ref.add({
-      [rhit.FB_KEY_NAME]: name,
-      [rhit.FB_KEY_MAXPLAYERS]: maxPlayers,
-      [rhit.FB_KEY_NUMROUNDS]: numRounds,
-      [rhit.FB_KEY_TIMEFORROUND]: roundTime,
-      [rhit.FB_KEY_PLAYERS]: [rhit.authManager.uid],
-      [rhit.FB_KEY_LISTS]: lists
-    }).then((docRef) => {
-      console.log("Document written with ID: ", docRef.id);
-      return docRef.id;
-    })
+        [rhit.FB_KEY_NAME]: name,
+        [rhit.FB_KEY_MAXPLAYERS]: maxPlayers,
+        [rhit.FB_KEY_NUMROUNDS]: numRounds,
+        [rhit.FB_KEY_TIMEFORROUND]: roundTime,
+        [rhit.FB_KEY_PLAYERS]: [rhit.authManager.uid],
+        [rhit.FB_KEY_LISTS]: lists
+      }).then((docRef) => {
+        console.log("Document written with ID: ", docRef.id);
+        return docRef.id;
+      })
       .catch((error) => {
         console.error("Error adding document: ", error);
       });
@@ -404,13 +390,13 @@ rhit.FbLobbyManager = class {
   stopListening() {
     this._unsub();
   }
-  deleteLobby() { }
+  deleteLobby() {}
   getLobbyAtIndex(index) {
     const docSnap = this._documentSnapshots[index];
     const lob = new rhit.LobbyModel(docSnap.id, docSnap.get("MaxPlayers"), docSnap.get("NumRounds"), docSnap.get("TimeforRound"), docSnap.get("Players"), docSnap.get("Lists"), docSnap.get("CurrentGame"), docSnap.get("Name"));
     return lob;
   }
-  searchLobbiesByName() { }
+  searchLobbiesByName() {}
 
 }
 
@@ -503,7 +489,7 @@ rhit.FbSingleLobbyManager = class {
     }));
   }
 
-  startGame(){
+  startGame() {
     console.log("here");
     // create new game manager
   }
@@ -511,53 +497,53 @@ rhit.FbSingleLobbyManager = class {
 
 
 /** List CODE. */
-rhit.ListModel = class{
-  constructor(id, name, owner, categories, isPublic){
+rhit.ListModel = class {
+  constructor(id, name, owner, categories, isPublic) {
     this.id = id;
     this.name = name;
-    this.owner = owner; 
+    this.owner = owner;
     this.categories = categories;
     this.isPublic = isPublic;
   }
 }
 
 
-rhit.FbListsManager = class{
-  constructor(){
+rhit.FbListsManager = class {
+  constructor() {
     this._documentSnapshots = [];
     this._ref = firebase.firestore().collection("Lists");
     this._unsub = null;
   }
 
   beginListening(changeListener) {
-    this._unsub = this._ref.onSnapshot((qs) =>{
+    this._unsub = this._ref.onSnapshot((qs) => {
       this._documentSnapshots = qs.docs;
       changeListener();
     });
   }
 
-  get customLists(){
+  get customLists() {
     let lists = [];
-    this._documentSnapshots.forEach((snap) =>{
+    this._documentSnapshots.forEach((snap) => {
       lists.push(new rhit.ListModel(snap.id, snap.get("Name"), snap.get("Owner"), snap.get("Categories"), snap.get("public")));
     });
 
     console.log("All lists:", lists);
 
-    lists = lists.filter((list) =>{
+    lists = lists.filter((list) => {
       return list.owner == rhit.authManager.uid;
     });
 
     return lists;
   }
 
-  get defaultLists(){
+  get defaultLists() {
     let lists = [];
-    this._documentSnapshots.forEach((snap) =>{
+    this._documentSnapshots.forEach((snap) => {
       lists.push(new rhit.ListModel(snap.id, snap.get("Name"), snap.get("Owner"), snap.get("Categories"), snap.get("public")));
     });
 
-    lists = lists.filter((list) =>{
+    lists = lists.filter((list) => {
       return list.owner == "DEFAULT";
     });
 
@@ -568,11 +554,14 @@ rhit.FbListsManager = class{
 /** INIT CODE. */
 
 rhit.checkForRedirects = function () {
-  if ((document.querySelector("#signinPage") || document.querySelector("#signupPage")) && rhit.authManager.isSignedIn) {
+  if (document.querySelector("#signinPage") && rhit.authManager.isSignedIn) {
 
     window.location.href = "/lobbyselect.html";
-  }
-  if (!(document.querySelector("#mainPage") || document.querySelector("#signinPage") || document.querySelector("#signupPage")) && !rhit.authManager.isSignedIn) {
+  } else if (document.querySelector("#signupPage") && rhit.authManager.isSignedIn) {
+
+    rhit.authManager.signOut();
+    window.location.href = "/";
+  } else if (!(document.querySelector("#mainPage") || document.querySelector("#signinPage") || document.querySelector("#signupPage")) && !rhit.authManager.isSignedIn) {
     console.log("aefkaj;eiofja;eiofjae'iofajefaEGAEOGJZGJAAE:ROGJAEAE:AJE:RKOGARLGKALLRG");
     window.location.href = "/";
   }
@@ -587,9 +576,11 @@ rhit.initializePage = function () {
     document.querySelector("#signOutBtn").onclick = (event) => {
       rhit.authManager.signOut();
     }
-  } if (document.getElementById("lobbySelectPage")) {
+  }
+  if (document.getElementById("lobbySelectPage")) {
     rhit.lobbySelectInit();
-  } if (document.getElementById("lobbyPage")) {
+  }
+  if (document.getElementById("lobbyPage")) {
     rhit.lobbyInit();
   }
 
