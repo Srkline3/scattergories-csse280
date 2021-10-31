@@ -44,6 +44,10 @@ function htmlToElement(html) {
   return template.content.firstChild;
 }
 
+function getRandomInt(max) {
+  return Math.floor(Math.random() * max);
+}
+
 /** AUTH CODE */
 rhit.AuthPageController = class {
   constructor() {
@@ -459,7 +463,7 @@ rhit.LobbyController = class {
 
       newGame.lists = rhit.fbSingleLobbyManager.lists;
       
-      rhit.fbGamesManager.addGame(newGame).then((game) => {
+      rhit.fbSingleLobbyManager.addGame(newGame).then((game) => {
         console.log("Starting game:", game)
         rhit.fbSingleLobbyManager.startGame(game);
 
@@ -556,6 +560,30 @@ rhit.FbSingleLobbyManager = class {
       }
     }));
   }
+  addGame(game) {
+    let assignScores = game.players.reduce(function (allPlayers, player) {
+
+      allPlayers[player] = 0
+
+      return allPlayers;
+    }, {});
+    console.log(assignScores, "here is the socre")
+    return firebase.firestore().collection("Games").add({
+      Players: game.players,
+      DoneVoting: game.doneVoting,
+      GameOver: game.gameOver,
+      RoundOverTime: game.roundOverTime,
+      Scores: assignScores,
+      Lists: game.lists
+    }).then((docRef) => {
+      console.log("Document written with ID: ", docRef.id);
+      game.scores = assignScores;
+      return docRef.id;
+    }).catch((error) => {
+      console.error("Error adding document: ", error);
+    });
+  };
+
 
   startGame(gameId) {
     console.log("Starting Game");
@@ -582,54 +610,6 @@ rhit.GameModel = class {
   }
 }
 
-rhit.FbGamesManager = class {
-  constructor(game) {
-    this._documentSnapshots = [];
-    this._ref = firebase.firestore().collection("Games");
-    this._unsub = null;
-
-    this._game = null;
-  }
-
-  addGame(game) {
-    let assignScores = game.players.reduce(function (allPlayers, player) {
-
-      allPlayers[player] = 0
-
-      return allPlayers;
-    }, {});
-    console.log(assignScores, "here is the socre")
-    return this._ref.add({
-      Players: game.players,
-      DoneVoting: game.doneVoting,
-      GameOver: game.gameOver,
-      RoundOverTime: game.roundOverTime,
-      Scores: assignScores,
-      Lists: game.lists
-    }).then((docRef) => {
-      console.log("Document written with ID: ", docRef.id);
-      game.scores = assignScores;
-      this._game = game;
-      console.log("game info ", this._game)
-      return docRef.id;
-    }).catch((error) => {
-      console.error("Error adding document: ", error);
-    });
-  }
-  // beginListening(changeListener) {
-  //   console.log(rhit.fbGamesManager.game);
-  //   this._unsub = this._ref.onSnapshot((qs) => {
-  //     this._documentSnapshots = qs.docs;
-
-  //     changeListener();
-  //   });
-  // }
-  get game() {
-    return this._game;
-  }
-
-}
-
 rhit.FbSingleGameManager = class {
   constructor(gameId) {
     this.gameId = gameId;
@@ -638,9 +618,9 @@ rhit.FbSingleGameManager = class {
     this._ref = firebase.firestore().collection("Games").doc(gameId);
 
     //Insert Current User into lobby
-    this._ref.update({
-      Players: firebase.firestore.FieldValue.arrayUnion(rhit.authManager.uid)
-    });
+    // this._ref.update({
+    //   Players: firebase.firestore.FieldValue.arrayUnion(rhit.authManager.uid)
+    // });
   }
   async beginListening(changeListener) {
     this._ref.onSnapshot((doc => {
@@ -657,13 +637,17 @@ rhit.FbSingleGameManager = class {
     return this._documentSnapshot.get("Scores");
   }
   get lists(){
+    
     return this._documentSnapshot.get("Lists");
   }
   get roundOverTime() {
     return this._documentSnapshot.get("RoundOverTime");
   }
 
-
+  get randomList(){
+    var length = this._documentSnapshot.get("Lists").length;
+    return this._documentSnapshot.get("Lists")[getRandomInt(length)]
+  }
 }
 
 rhit.GameController = class {
@@ -681,7 +665,7 @@ rhit.GameController = class {
       
     }
     
-    console.log("lists", rhit.fbSingleGameManager.categories)
+    console.log("lists", rhit.fbSingleGameManager.randomList)
     console.log("Timer  ", rhit.fbSingleGameManager.roundOverTime);
   }
 }
@@ -832,7 +816,6 @@ rhit.lobbySelectInit = function () {
 rhit.lobbyInit = function () {
   const urlParams = new URLSearchParams(window.location.search)
   rhit.fbSingleLobbyManager = new rhit.FbSingleLobbyManager(urlParams.get("lobby"));
-  rhit.fbGamesManager = new rhit.FbGamesManager();
   new rhit.LobbyController();
 }
 
