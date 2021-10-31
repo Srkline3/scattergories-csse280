@@ -51,7 +51,7 @@ rhit.AuthPageController = class {
 
     if (document.getElementById("signinPage")) {
       document.querySelector("#signinBtn").onclick = (event) => {
-        rhit.authManager.signIn(inputEmailEl.value, inputPasswordEl.value);
+        rhit.authManager.signIn(inputEmailEl.value, inputPasswordEl.value, this.signInErrorHandler);
       }
     } else {
       document.querySelector("#signupBtn").onclick = (event) => {
@@ -59,10 +59,38 @@ rhit.AuthPageController = class {
         const inputUsernameEl = document.querySelector("#inputUsername");
         console.log("are you try to sign up?");
 
-        rhit.authManager.signUp(inputEmailEl.value, inputPasswordEl.value, inputAvatatEl.value, inputUsernameEl.value);
+        rhit.authManager.signUp(inputEmailEl.value, inputPasswordEl.value, inputAvatatEl.value, inputUsernameEl.value, this.signUpErrorHandler);
       }
     }
   }
+
+  signInErrorHandler(error) {
+    const errText = document.getElementById("signInError");
+    if (error == "auth/wrong-password") {
+      errText.innerHTML = "The email or password provided was incorrect";
+    } else {
+      errText.innerHTML = "There was an error logging in. Please check your log in information and try again.";
+    }
+
+    errText.style.display = "block";
+
+  }
+
+  signUpErrorHandler(error) {
+    const errText = document.getElementById("signUpError");
+
+    if (error == "auth/email-already-in-use") {
+      errText.innerHTML = "The email provided is already in use";
+    } else if (error == "auth/weak-password") {
+      errText.innerHTML = "Password should be at least 6 characters.";
+    } else {
+      errText.innerHTML = "There was an error logging in. Please check your log in information and try again.";
+    }
+
+    errText.style.display = "block";
+
+  }
+
 }
 
 rhit.AuthManager = class {
@@ -110,18 +138,19 @@ rhit.AuthManager = class {
     });
   }
 
-  signIn(email, password) {
+  signIn(email, password, errorHandler) {
     firebase.auth().signInWithEmailAndPassword(email, password)
       .catch((error) => {
         var errorCode = error.code;
         var errorMessage = error.message;
-        console.log("create account error,", errorCode, errorMessage);
+        console.log("log in error,", errorCode, errorMessage);
+        errorHandler(errorCode);
       });
 
   }
 
 
-  signUp(email, password, avatar, username) {
+  signUp(email, password, avatar, username, errorHandler) {
     this._avatar = avatar;
     this._username = username;
     firebase.auth().createUserWithEmailAndPassword(email, password)
@@ -130,8 +159,8 @@ rhit.AuthManager = class {
       .catch((error) => {
         var errorCode = error.code;
         var errorMessage = error.message;
-        console.log("log in error,", errorCode, errorMessage);
-
+        console.log("sign up error,", errorCode, errorMessage);
+        errorHandler(errorCode);
       });
   };
 
@@ -239,8 +268,12 @@ rhit.LobbyListController = class {
     for (let i = 0; i < rhit.fbLobbyManager.length; i++) {
       const lob = rhit.fbLobbyManager.getLobbyAtIndex(i);
       console.log("Got lobby:", lob);
-      lobList.appendChild(this.createJoinLobby(lob));
-
+      if(lob.players.length > 0){
+        lobList.appendChild(this.createJoinLobby(lob));
+      }else{
+        rhit.fbLobbyManager.deleteLobby(lob.lobbyId);
+      }
+      
 
     }
 
@@ -251,9 +284,20 @@ rhit.LobbyListController = class {
 
     for (let i = 0; i < rhit.fbLobbyManager.length; i++) {
       const lob = rhit.fbLobbyManager.getLobbyAtIndex(i);
-      document.getElementById(`lobButt${lob.lobbyId}`).onclick = (event) => {
-        console.log("You joined: ", lob.lobbyId);
-        window.location.href = `/lobby.html?lobby=${lob.lobbyId}`
+
+      const lobEl = document.getElementById(`lobButt${lob.lobbyId}`);
+
+      console.log("Max: ")
+
+      if (lob.players.length < lob.maxPlayers) {
+        lobEl.onclick = (event) => {
+          console.log("You joined: ", lob.lobbyId);
+          window.location.href = `/lobby.html?lobby=${lob.lobbyId}`
+        }
+      } else {
+        lobEl.classList.remove("our-button-secondary");
+        lobEl.classList.add("our-button-inactive");
+        lobEl.innerHTML = "FULL";
       }
     }
   }
@@ -297,8 +341,6 @@ rhit.LobbyListController = class {
       </div>`);
 
     return lobbyHtml;
-
-
   }
 
 }
@@ -363,16 +405,16 @@ rhit.FbLobbyManager = class {
     console.log("create lobby...");
 
     return this._ref.add({
-        [rhit.FB_KEY_NAME]: name,
-        [rhit.FB_KEY_MAXPLAYERS]: maxPlayers,
-        [rhit.FB_KEY_NUMROUNDS]: numRounds,
-        [rhit.FB_KEY_TIMEFORROUND]: roundTime,
-        [rhit.FB_KEY_PLAYERS]: [rhit.authManager.uid],
-        [rhit.FB_KEY_LISTS]: lists
-      }).then((docRef) => {
-        console.log("Document written with ID: ", docRef.id);
-        return docRef.id;
-      })
+      [rhit.FB_KEY_NAME]: name,
+      [rhit.FB_KEY_MAXPLAYERS]: maxPlayers,
+      [rhit.FB_KEY_NUMROUNDS]: numRounds,
+      [rhit.FB_KEY_TIMEFORROUND]: roundTime,
+      [rhit.FB_KEY_PLAYERS]: [rhit.authManager.uid],
+      [rhit.FB_KEY_LISTS]: lists
+    }).then((docRef) => {
+      console.log("Document written with ID: ", docRef.id);
+      return docRef.id;
+    })
       .catch((error) => {
         console.error("Error adding document: ", error);
       });
@@ -390,13 +432,15 @@ rhit.FbLobbyManager = class {
   stopListening() {
     this._unsub();
   }
-  deleteLobby() {}
+  deleteLobby(lobbyId) {
+    this._ref.doc(lobbyId).delete();
+  }
   getLobbyAtIndex(index) {
     const docSnap = this._documentSnapshots[index];
     const lob = new rhit.LobbyModel(docSnap.id, docSnap.get("MaxPlayers"), docSnap.get("NumRounds"), docSnap.get("TimeforRound"), docSnap.get("Players"), docSnap.get("Lists"), docSnap.get("CurrentGame"), docSnap.get("Name"));
     return lob;
   }
-  searchLobbiesByName() {}
+  searchLobbiesByName() { }
 
 }
 
@@ -410,6 +454,11 @@ rhit.LobbyController = class {
     //TODO: Add check if they are leaving the page to go to the game page (if so don't kick)
     window.onbeforeunload = (event) => {
       rhit.fbSingleLobbyManager.removeCurrentPlayer();
+      console.log("Players after remove: ", rhit.fbSingleLobbyManager.players);
+      // if (rhit.fbSingleLobbyManager.players.length >= 0) {
+      //   rhit.fbSingleLobbyManager.deleteLobby();
+      // }
+
     }
   }
   updateView() {
@@ -468,12 +517,14 @@ rhit.FbSingleLobbyManager = class {
     return this._documentSnapshot.get("Name");
   }
 
+  deleteLobby() {
+    this._ref.delete();
+  }
+
   removeCurrentPlayer() {
     this._ref.update({
       Players: firebase.firestore.FieldValue.arrayRemove(rhit.authManager.uid)
     });
-
-    //Add code to delete lobby if the last player leaves ! ? !? !
 
   }
 
@@ -579,9 +630,11 @@ rhit.initializePage = function () {
   }
   if (document.getElementById("lobbySelectPage")) {
     rhit.lobbySelectInit();
+    rhit.drawerMenuInit();
   }
   if (document.getElementById("lobbyPage")) {
     rhit.lobbyInit();
+    rhit.drawerMenuInit();
   }
 
 
@@ -634,6 +687,12 @@ rhit.lobbyInit = function () {
   const urlParams = new URLSearchParams(window.location.search)
   rhit.fbSingleLobbyManager = new rhit.FbSingleLobbyManager(urlParams.get("lobby"));
   new rhit.LobbyController();
+}
+
+rhit.drawerMenuInit = function () {
+  document.getElementById("menuSignOut").onclick = (event) => {
+    rhit.authManager.signOut();
+  }
 }
 
 rhit.main();

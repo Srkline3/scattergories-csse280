@@ -11,11 +11,30 @@
 </head>
 
 <body>
-	<nav class="navbar navbar-dark fixed-top">
-		<a class="navbar-brand" href="#">Scattergories</a>
-	</nav>
-	<div id="lobbySelectPage" class="container page-container">
-		<!-- <form id="searchForm"> -->
+	<div class="bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay">
+		<header class="bmd-layout-header">
+			<div class="navbar navbar-dark bg-faded justify-content-start">
+				<button class="navbar-toggler" type="button" data-toggle="drawer" data-target="#dw-s1">
+					<span class="sr-only">Toggle drawer</span>
+					<i class="material-icons">menu</i>
+				</button>
+				<a class="navbar-brand" href="/list.html">&nbsp;&nbsp;Scattergories</a>
+			</div>
+		</header>
+		<div id="dw-s1" class="bmd-layout-drawer bg-faded">
+			<header>
+				<a class="navbar-brand">Scattergories</a>
+			</header>
+			<ul class="list-group">
+				<!-- <a class="list-group-item" id="menuShowAllQuotes"><i class="material-icons">person</i>Show all
+					quotes</a>
+				<a class="list-group-item" id="menuShowMyQuotes"><i class="material-icons">people</i>Show my quotes</a> -->
+				<a class="list-group-item" id="menuSignOut"><i class="material-icons">login</i>Sign Out</a>
+			</ul>
+		</div>
+		<main class="bmd-layout-content">
+		<div id="lobbySelectPage" class="container page-container">
+			<!-- <form id="searchForm"> -->
 			<div id="lobbySearch" class="input-group rounded">
 				<input id="searchInput" type="search" class="form-control rounded" placeholder="Search for a lobby"
 					aria-label="Search" aria-describedby="search-addon" />
@@ -23,16 +42,18 @@
 					<i class="fas fa-search"></i>
 				</span>
 			</div>
-		<!-- </form> -->
-		<h1>Join Lobby</h1>
-		<div id="lobbies" class="overflow-auto">
-			<h1>Loading...</h1>
-		</div>
-		<button type="button" id="createLobbyButton" class="btn our-button-active" data-toggle="modal"
-			data-target="#createLobbyModal">
+			<!-- </form> -->
+			<h1>Join Lobby</h1>
+			<div id="lobbies" class="overflow-auto">
+				<h1>Loading...</h1>
+			</div>
+			<button type="button" id="createLobbyButton" class="btn our-button-active" data-toggle="modal"
+				data-target="#createLobbyModal">
 
-			Create Lobby
-		</button>
+				Create Lobby
+			</button>
+		</div>
+		</main>
 
 		<!-- Modal -->
 		<div class="modal fade" id="createLobbyModal" tabindex="-1" aria-labelledby="exampleModalLabel"

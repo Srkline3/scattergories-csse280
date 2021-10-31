@@ -11,20 +11,41 @@
 </head>
 
 <body>
-	<nav class="navbar navbar-dark fixed-top">
-		<a class="navbar-brand" href="#">Scattergories</a>
-	</nav>
-	<div id="lobbyPage" class="container page-container">
-		<div>
-			<h1 id="lobbyName">Lobby:</h1>
-			<hr>
-			<div id="lobbyPlayers">
-			</div>
+	<div class="bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay">
+		<header class="bmd-layout-header">
+		  <div class="navbar navbar-dark bg-faded justify-content-start">
+			<button class="navbar-toggler" type="button" data-toggle="drawer" data-target="#dw-s1">
+			  <span class="sr-only">Toggle drawer</span>
+			  <i class="material-icons">menu</i>
+			</button>
+			<a class="navbar-brand" href="/list.html">&nbsp;&nbsp;My Movie Quotes</a>
+		  </div>
+		</header>
+		<div id="dw-s1" class="bmd-layout-drawer bg-faded">
+		  <header>
+			<a class="navbar-brand">My Movie Quotes</a>
+		  </header>
+		  <ul class="list-group">
+			<a class="list-group-item" id="menuSignOut"><i class="material-icons">login</i>Sign Out</a>
+		  </ul>
 		</div>
-		<button id="startGameButton" class="btn our-button-active" >Start Game</button>
-		<p id="waitingText">Waiting for lobby owner to start the game...</p>
+		<main class="bmd-layout-content">
+			<div id="lobbyPage" class="container page-container">
+				<div>
+					<h1 id="lobbyName">Lobby:</h1>
+					<hr>
+					<div id="lobbyPlayers">
+					</div>
+				</div>
+				<button id="startGameButton" class="btn our-button-active" >Start Game</button>
+				<p id="waitingText">Waiting for lobby owner to start the game...</p>
+		
+			</div>
+		</main>
+	  </div>
 
-	</div>
+
+
 	<script src="scripts/jquery.min.js"></script>
 	<script src="scripts/popper.js"></script>
 	<script src="scripts/bootstrap-material-design.js"></script>

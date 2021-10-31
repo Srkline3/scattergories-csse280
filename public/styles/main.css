@@ -8,6 +8,10 @@ body {
 }
 
 .page-container {
+    margin-top: 15px;
+}
+
+.no-nav-page-container{
     margin-top: 75px;
 }
 
@@ -19,6 +23,10 @@ body {
 
 .our-button-secondary{
     border: 2px solid #673AB7;
+}
+
+.our-button-inactive{
+    border: 2px solid gray;
 }
 
 .lobby{
@@ -49,6 +57,7 @@ body {
 
 #lobbySelectPage > h1 {
     margin-bottom: 1em;
+    margin-top: 1em;
 }
 
 #createLobbyButton{
@@ -101,4 +110,15 @@ body {
     margin-right: auto;
     width: 50%;
     text-align: center;
+}
+
+
+#signInError, #signUpError{
+    color: red;
+    margin-top: 0.5em;
+    display: none;
+}
+
+.bmd-layout-content{
+    height: 100vh;
 }
