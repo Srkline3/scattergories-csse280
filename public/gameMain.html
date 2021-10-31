@@ -13,29 +13,47 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-dark fixed-top">
-        <a class="navbar-brand" href="#">Scattergories</a>
-    </nav>
-    <div id="gamePage" class="container page-container">
-
-        <div class="dropdown">
-            <button class="dropbtn">Players Info</button>
-            <div class="dropdown-content">
-                <p>link1</p>
+    <div class="bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay">
+        <header class="bmd-layout-header">
+            <div class="navbar navbar-dark bg-faded justify-content-start">
+              <button class="navbar-toggler" type="button" data-toggle="drawer" data-target="#dw-s1">
+                <span class="sr-only">Toggle drawer</span>
+                <i class="material-icons">menu</i>
+              </button>
+              <a class="navbar-brand" href="./lobby.html">&nbsp;&nbsp;Scattergories</a>
             </div>
-        </div>
-        <div class="gameInfo">
-            <h2>Letter: L</h2>
-            <h2>Timmer: 1:00</h2>
-        </div>
-
-        <!-- refernece : https://www.geeksforgeeks.org/how-to-create-a-form-dynamically-with-the-javascript/?ref=lbp -->
-        <div class="form-group">
-            <label for="inputAnswer" >Cate1</label>
-            <input type="email" class="form-control" id="inputEmail">
+          </header>
+          <div id="dw-s1" class="bmd-layout-drawer bg-faded">
+            <header>
+              <a class="navbar-brand">Scattergories</a>
+            </header>
+            <ul class="list-group">
+              <a class="list-group-item" id="menuSignOut"><i class="material-icons">login</i>Sign Out</a>
+            </ul>
           </div>
+    <main class="bmd-layout-content">
+        <div id="gamePage" class="container page-container">
 
-    </div>
+            <div class="dropdown">
+                <button class="dropbtn">Players Info</button>
+                <div class="dropdown-content">
+                    <p>link1</p>
+                </div>
+            </div>
+            <div class="gameInfo">
+                <h2>Letter: L</h2>
+                <h2>Timmer: 1:00</h2>
+            </div>
+    
+            <!-- refernece : https://www.geeksforgeeks.org/how-to-create-a-form-dynamically-with-the-javascript/?ref=lbp -->
+            <div class="form-group">
+                <label for="inputAnswer" >Cate1</label>
+                <input type="email" class="form-control" id="inputAnswer">
+              </div>
+    
+        </div>
+    </main>
+   </div>
     <!-- modal -->
     <div class="modal fade" id="timesUpModal" tabindex="-1" aria-labelledby="timesUpModalLabel"
     aria-hidden="true">
