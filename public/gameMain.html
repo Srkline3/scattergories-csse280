@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
     <link rel="stylesheet" href="styles/bootstrap-material-design.min.css">
     <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/dropdown.css">
+    <link rel="stylesheet" href="styles/game.css">
 
     <title>Scattergories</title>
 </head>
@@ -15,61 +15,92 @@
 <body>
     <div class="bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay">
         <header class="bmd-layout-header">
-            <div class="navbar navbar-dark bg-faded justify-content-start">
-              <button class="navbar-toggler" type="button" data-toggle="drawer" data-target="#dw-s1">
-                <span class="sr-only">Toggle drawer</span>
-                <i class="material-icons">menu</i>
-              </button>
-              <a class="navbar-brand" href="./lobby.html">&nbsp;&nbsp;Scattergories</a>
+            <div class="navbar navbar-dark bg-faded">
+                <div class="left-nav"> 
+                    <button class="navbar-toggler" type="button" data-toggle="drawer" data-target="#dw-s1">
+                        <span class="sr-only">Toggle drawer</span>
+                        <i class="material-icons">menu</i>
+                    </button>
+                    <a id="scattergoriesTitle" class="navbar-brand" href="./lobby.html">&nbsp;&nbsp;Scattergories</a>
+                </div>
+                <div>
+                    <div class="dropdown">
+                        <button class="dropbtn">Players Info</button>
+                        <div class="dropdown-content">
+                            <p>link1</p>
+                        </div>
+                    </div>
+                    <button class="dropbtn" type="button" data-toggle="modal" data-target="#rulesModal">Rules</button>
+                </div>
+
             </div>
-          </header>
-          <div id="dw-s1" class="bmd-layout-drawer bg-faded">
+        </header>
+        <div id="dw-s1" class="bmd-layout-drawer bg-faded">
             <header>
-              <a class="navbar-brand">Scattergories</a>
+                <a class="navbar-brand">Scattergories</a>
             </header>
             <ul class="list-group">
-              <a class="list-group-item" id="menuSignOut"><i class="material-icons">login</i>Sign Out</a>
+                <a class="list-group-item" id="menuSignOut"><i class="material-icons">login</i>Sign Out</a>
             </ul>
-          </div>
-    <main class="bmd-layout-content">
-        <div id="gamePage" class="container page-container">
-            <div class="dropdown">
-                <button class="dropbtn">Players Info</button>
-                <div class="dropdown-content">
-                    <p>link1</p>
-                </div>
-            </div>
-            <div class="gameInfo">
-                <h2 id="letterText" class="gameplay-header">Letter: L</h2>
-                <h2 id="timerText" class="gameplay-header">Timer: 1:00</h2>
-            </div>
-    
-            <!-- refernece : https://www.geeksforgeeks.org/how-to-create-a-form-dynamically-with-the-javascript/?ref=lbp -->
-            <div class="form-group">
-                <label for="inputAnswer" >Cate1</label>
-                <input type="email" class="form-control" id="inputAnswer">
-              </div>
-    
         </div>
-    </main>
-   </div>
-    <!-- modal -->
-    <div class="modal fade" id="timesUpModal" tabindex="-1" aria-labelledby="timesUpModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="timesUpModalLabel">Times Up</h5>
-              
+        <main class="bmd-layout-content">
+            <div id="gamePage" class="container page-container">
+
+                <div class="gameInfo">
+                    <h2 id="letterText" class="gameplay-header">Letter: L</h2>
+                    <h2 id="timerText" class="gameplay-header">Time: 1:00</h2>
+                </div>
+
+                <!-- refernece : https://www.geeksforgeeks.org/how-to-create-a-form-dynamically-with-the-javascript/?ref=lbp -->
+                <div class="form-group">
+                    <label for="inputAnswer">Cate1</label>
+                    <input type="email" class="form-control" id="inputAnswer">
+                </div>
+
             </div>
-          
-            <div class="modal-footer">
-            
-                <button type="button" id="timesUpBtn" data-dismiss="modal" class="btn btn-primary">OK</button>
+        </main>
+    </div>
+    <!-- time up modal -->
+    <div class="modal fade" id="timesUpModal" tabindex="-1" aria-labelledby="timesUpModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="timesUpModalLabel">Times Up</h5>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="timesUpBtn" data-dismiss="modal" class="btn btn-primary">OK</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
+
+    <!-- rules modal -->
+    <div class="modal fade" id="rulesModal" tabindex="-1" aria-labelledby="rulesModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rulesModalLabel">Rules</h5>
+                </div>
+                <div class="modal-body">
+                    <p>1. Each player must fill in the a that fits in each category that starts with the given letter.</p>
+                    <p>2. Playesr have until the end of the alloted time to think of words.</p>
+                    <p>3. When the time is up, the words will be scored:
+                        <ol>
+                            <li>Each valid word is worth one point</li>
+                            <li>Duplicate words do not count</li>
+                            <li>Players vote on whether or not the word fits the category</li>
+                        </ol>
+                    </p>
+          
+                    <p>Enjoy the game!</p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="rulesButton" data-dismiss="modal" class="btn btn-primary">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
     <script src="scripts/jquery.min.js"></script>
