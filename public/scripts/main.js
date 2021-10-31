@@ -33,6 +33,7 @@ rhit.authManager = null;
 rhit.fbSingleLobbyManager = null;
 rhit.fbUsersManager = null;
 rhit.fbListsManager = null;
+rhit.fbGamesManager = null;
 
 
 /** HELPER FUNCTIONS */
@@ -440,7 +441,6 @@ rhit.FbLobbyManager = class {
     const lob = new rhit.LobbyModel(docSnap.id, docSnap.get("MaxPlayers"), docSnap.get("NumRounds"), docSnap.get("TimeforRound"), docSnap.get("Players"), docSnap.get("Lists"), docSnap.get("CurrentGame"), docSnap.get("Name"));
     return lob;
   }
-  searchLobbiesByName() { }
 
 }
 
@@ -449,17 +449,19 @@ rhit.LobbyController = class {
   constructor() {
     rhit.fbSingleLobbyManager.beginListening(this.updateView.bind(this));
 
-    //Listener to kick player from the lobby if they leave the page
-
-    //TODO: Add check if they are leaving the page to go to the game page (if so don't kick)
     window.onbeforeunload = (event) => {
       rhit.fbSingleLobbyManager.removeCurrentPlayer();
       console.log("Players after remove: ", rhit.fbSingleLobbyManager.players);
-      // if (rhit.fbSingleLobbyManager.players.length >= 0) {
-      //   rhit.fbSingleLobbyManager.deleteLobby();
-      // }
-
     }
+
+    document.getElementById("startGameButton").onclick = () =>{
+      rhit.fbGamesManager.addGame(new rhit.GameModel(null, [rhit.authManager.uid])).then((game) =>{
+        console.log("Starting game:", game)
+        rhit.fbSingleLobbyManager.startGame(game);
+      });
+      
+    }
+
   }
   updateView() {
     document.getElementById("lobbyName").innerHTML = `Lobby: ${rhit.fbSingleLobbyManager.name}`
@@ -503,10 +505,6 @@ rhit.FbSingleLobbyManager = class {
     this._ref.update({
       Players: firebase.firestore.FieldValue.arrayUnion(rhit.authManager.uid)
     });
-    document.getElementById("startGameButton").addEventListener("click", (event) => {
-
-      this.startGame();
-    });
   }
 
   get players() {
@@ -540,10 +538,50 @@ rhit.FbSingleLobbyManager = class {
     }));
   }
 
-  startGame() {
-    console.log("here");
-    // create new game manager
+  startGame(gameId) {
+    console.log("Starting Game");
+    this._ref.update({
+      Game: gameId
+    })
+    
   }
+}
+
+
+/** Game CODE. */
+rhit.GameModel = class{
+  constructor(id, players){
+    this.id = id;
+    this.players = players;
+    this.gameOver = false;
+    this.doneVoting = [];
+    this.roundOverTime = new Date(0);
+    this.score = [];
+    this.playerInputs = [];
+  }
+}
+
+rhit.FbGamesManager = class{
+  constructor(game){
+    this._documentSnapshots = [];
+    this._ref = firebase.firestore().collection("Games");
+    this._unsub = null;
+  }
+
+  addGame(game){
+    return this._ref.add({
+      Players: game.players,
+      DoneVoting: game.doneVoting,
+      GameOver: game.gameOver,
+      RoundOverTime: game.roundOverTime
+    }).then((docRef) =>{
+      console.log("Document written with ID: ", docRef.id);
+      return docRef.id;
+    }).catch((error) =>{
+      console.error("Error adding document: ", error);
+    });
+  }
+  
 }
 
 
@@ -686,6 +724,7 @@ rhit.lobbySelectInit = function () {
 rhit.lobbyInit = function () {
   const urlParams = new URLSearchParams(window.location.search)
   rhit.fbSingleLobbyManager = new rhit.FbSingleLobbyManager(urlParams.get("lobby"));
+  rhit.fbGamesManager = new rhit.FbGamesManager();
   new rhit.LobbyController();
 }
 
