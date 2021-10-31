@@ -269,12 +269,12 @@ rhit.LobbyListController = class {
     for (let i = 0; i < rhit.fbLobbyManager.length; i++) {
       const lob = rhit.fbLobbyManager.getLobbyAtIndex(i);
       console.log("Got lobby:", lob);
-      if(lob.players.length > 0){
+      if (lob.players.length > 0) {
         lobList.appendChild(this.createJoinLobby(lob));
-      }else{
+      } else {
         rhit.fbLobbyManager.deleteLobby(lob.lobbyId);
       }
-      
+
 
     }
 
@@ -454,40 +454,46 @@ rhit.LobbyController = class {
       console.log("Players after remove: ", rhit.fbSingleLobbyManager.players);
     }
 
-    document.getElementById("startGameButton").onclick = () =>{
-      rhit.fbGamesManager.addGame(new rhit.GameModel(null, [rhit.authManager.uid])).then((game) =>{
+    document.getElementById("startGameButton").onclick = () => {
+      rhit.fbGamesManager.addGame(new rhit.GameModel(null, [rhit.authManager.uid])).then((game) => {
         console.log("Starting game:", game)
         rhit.fbSingleLobbyManager.startGame(game);
       });
-      
+
     }
 
   }
   updateView() {
-    document.getElementById("lobbyName").innerHTML = `Lobby: ${rhit.fbSingleLobbyManager.name}`
-    const playerList = htmlToElement('<div id="lobbyPlayers"></div>');
+    if (!rhit.fbSingleLobbyManager.game) {
+      document.getElementById("lobbyName").innerHTML = `Lobby: ${rhit.fbSingleLobbyManager.name}`
+      const playerList = htmlToElement('<div id="lobbyPlayers"></div>');
 
-    const players = rhit.fbSingleLobbyManager.players;
-    console.log("Players:", players);
-    players.forEach((player) => {
-      rhit.fbUsersManager.getUserInfo(player).then((playerModel) => {
-        console.log("Player Info:", playerModel);
-        playerList.appendChild(htmlToElement(`<h2>${playerModel.username}</h2>`));
+      const players = rhit.fbSingleLobbyManager.players;
+      console.log("Players:", players);
+      players.forEach((player) => {
+        rhit.fbUsersManager.getUserInfo(player).then((playerModel) => {
+          console.log("Player Info:", playerModel);
+          playerList.appendChild(htmlToElement(`<h2>${playerModel.username}</h2>`));
+        });
       });
-    });
 
-    const oldList = document.getElementById("lobbyPlayers");
-    oldList.removeAttribute("id");
-    oldList.hidden = true;
-    oldList.parentElement.appendChild(playerList);
+      const oldList = document.getElementById("lobbyPlayers");
+      oldList.removeAttribute("id");
+      oldList.hidden = true;
+      oldList.parentElement.appendChild(playerList);
 
-    console.log(players[0] + " == " + rhit.authManager.uid);
-    if (players[0] == rhit.authManager.uid) {
-      console.log("I'm the lobby owner");
+      console.log(players[0] + " == " + rhit.authManager.uid);
+      if (players[0] == rhit.authManager.uid) {
+        console.log("I'm the lobby owner");
 
-      document.getElementById("startGameButton").style.display = "block";
-      document.getElementById("waitingText").style.display = "none";
+        document.getElementById("startGameButton").style.display = "block";
+        document.getElementById("waitingText").style.display = "none";
+      }
+    }else{
+      window.location.href = `/gameMain.html?gameId=${rhit.fbSingleLobbyManager.game}`
     }
+
+
 
 
   }
@@ -513,6 +519,10 @@ rhit.FbSingleLobbyManager = class {
 
   get name() {
     return this._documentSnapshot.get("Name");
+  }
+
+  get game() {
+    return this._documentSnapshot.get("Game");
   }
 
   deleteLobby() {
@@ -543,14 +553,14 @@ rhit.FbSingleLobbyManager = class {
     this._ref.update({
       Game: gameId
     })
-    
+
   }
 }
 
 
 /** Game CODE. */
-rhit.GameModel = class{
-  constructor(id, players){
+rhit.GameModel = class {
+  constructor(id, players) {
     this.id = id;
     this.players = players;
     this.gameOver = false;
@@ -561,28 +571,30 @@ rhit.GameModel = class{
   }
 }
 
-rhit.FbGamesManager = class{
-  constructor(game){
+rhit.FbGamesManager = class {
+  constructor(game) {
     this._documentSnapshots = [];
     this._ref = firebase.firestore().collection("Games");
     this._unsub = null;
   }
 
-  addGame(game){
+  addGame(game) {
     return this._ref.add({
       Players: game.players,
       DoneVoting: game.doneVoting,
       GameOver: game.gameOver,
       RoundOverTime: game.roundOverTime
-    }).then((docRef) =>{
+    }).then((docRef) => {
       console.log("Document written with ID: ", docRef.id);
       return docRef.id;
-    }).catch((error) =>{
+    }).catch((error) => {
       console.error("Error adding document: ", error);
     });
   }
-  
+
 }
+
+
 
 
 /** List CODE. */
