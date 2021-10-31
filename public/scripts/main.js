@@ -593,7 +593,14 @@ rhit.FbGamesManager = class {
   }
 
 }
-
+rhit.GameController=class{
+  constructor(){
+    rhit.fbGamesManager.beginListening(this.updateView.bind(this));
+  }
+  updateView(){
+    
+  }
+}
 
 
 
