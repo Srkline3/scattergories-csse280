@@ -1,7 +1,7 @@
 .dropbtn {
-    background-color: purple;
+    background-color: #673AB7;
     color: white;
-    padding: 16px;
+    padding: 8px;
     font-size: 16px;
     border: none;
     cursor: pointer;
@@ -37,4 +37,28 @@
   .dropdown:hover .dropbtn {
     background-color: rebeccapurple;
   }
+
+.gameplay-header{
+    flex: 1;
+}
+
+#letterText{
+    border-right: 1px solid gray;
+}
+
+#timerText{
+    border-left: 1px solid gray;
+}
+
+.navbar-brand{
+  vertical-align: center;
+}
+
+.left-nav{
+  display: flex;
+  flex-direction: row;
+  align-content: center;
+}
+
+
  
