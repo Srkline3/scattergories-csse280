@@ -56,10 +56,18 @@ function  showTimer(){
   let time = rhit.fbSingleGameManager.roundOverTime.toDate();
   let currentTime = new Date();
   var distance = time-currentTime;
-  var  minutes = Math.floor((distance % (1000*60*60)) / 60000);
-  var seconds = Math.floor((distance % (1000*60)) / 1000);
-  const timeBar =document.getElementById("timerText");
-  timeBar.textContent=`Timer: ${minutes}:${seconds} `
+  if (distance<=0){
+    clearInterval();
+    const timeBar =document.getElementById("timerText");
+    timeBar.textContent=`Time Out `
+  }else{
+    var  minutes = Math.floor((distance % (1000*60*60)) / 60000);
+    var seconds = Math.floor((distance % (1000*60)) / 1000);
+    const timeBar =document.getElementById("timerText");
+    timeBar.textContent=`Timer: ${minutes}:${seconds} `
+  }
+
+  return distance;
 }
 
 /** AUTH CODE */
@@ -693,17 +701,8 @@ rhit.GameController = class {
     const letterBar = document.getElementById("letterText");
     letterBar.textContent=`Letter: ${rhit.fbSingleGameManager.randomLetter} `
     console.log("lists", rhit.fbSingleGameManager.randomList);
-    let time = rhit.fbSingleGameManager.roundOverTime.toDate();
-    let currentTime = new Date();
-    var distance = time-currentTime;
-    if (distance<0){
-      const timeBar =document.getElementById("timerText");
-      timeBar.textContent=`Time Out `
-    }else{
-      showTimer();
-      setInterval(showTimer,1000);
-    }
-    
+    setInterval(showTimer,1000);
+   
   }
 
  
