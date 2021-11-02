@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
     <link rel="stylesheet" href="styles/bootstrap-material-design.min.css">
+    <link rel="stylesheet" href="styles/vote.css">
     <link rel="stylesheet" href="styles/main.css">
     <title>Scattergories</title>
 </head>
@@ -35,16 +36,25 @@
                 <h1 id="VoteCateName">Category: Types of Drinks</h1>
                 <hr>
                 <form id="playerAnswers">
-                    <h2>Trey</h2>
-                    <label for="player1Cate1Answer">Coke</label>
-                    <button type="button">Yes!</button>
-                    <button type="button">No!</button>
+                    <p>Trey</p>
+                    <div class="voteRow">
+                        <h2>Coke</h2>
+                        <div class="voteButtons">
+                            <button type="button">Yes!</button>
+                            <button type="button">No!</button>
+                        </div>
+                    </div>
+
                 </form>
                 <form id="playerAnswers">
-                    <h2>Shannon</h2>
-                    <label for="player2Cate1Answer">Diet Coke</label>
-                    <button type="button">Yes!</button>
-                    <button type="button">No!</button>
+                    <p>Shannon</p>
+                    <div class="voteRow">
+                        <h2>Diet Coke</h2>
+                        <div class="voteButtons">
+                            <button type="button">Yes!</button>
+                            <button type="button">No!</button>
+                        </div>
+                    </div>
                 </form>
                 <button id="submitVoteBtn" class="btn our-button-active">Submit</button>
 
