@@ -30,8 +30,8 @@ rhit.FB_KEY_TIMEFORROUND = "TimeforRound";
 rhit.FB_KEY_LISTS = "Lists";
 //gameinput collection
 rhit.FB_KEY_PLAYER = "Player";
-rhit.FB_KEY_CATEGORY="Category";
-rhit.FB_KEY_ANSWER="Answer";
+rhit.FB_KEY_CATEGORY = "Category";
+rhit.FB_KEY_ANSWER = "Answer";
 rhit.fbLobbyManager = null;
 rhit.authManager = null;
 rhit.fbSingleLobbyManager = null;
@@ -190,7 +190,7 @@ rhit.AuthManager = class {
     this._avatar = avatar;
     this._username = username;
     firebase.auth().createUserWithEmailAndPassword(email, password)
-      .then(create => {})
+      .then(create => { })
       .catch((error) => {
         var errorCode = error.code;
         var errorMessage = error.message;
@@ -440,16 +440,16 @@ rhit.FbLobbyManager = class {
     console.log("create lobby...");
 
     return this._ref.add({
-        [rhit.FB_KEY_NAME]: name,
-        [rhit.FB_KEY_MAXPLAYERS]: maxPlayers,
-        [rhit.FB_KEY_NUMROUNDS]: numRounds,
-        [rhit.FB_KEY_TIMEFORROUND]: roundTime,
-        [rhit.FB_KEY_PLAYERS]: [rhit.authManager.uid],
-        [rhit.FB_KEY_LISTS]: lists
-      }).then((docRef) => {
-        console.log("Document written with ID: ", docRef.id);
-        return docRef.id;
-      })
+      [rhit.FB_KEY_NAME]: name,
+      [rhit.FB_KEY_MAXPLAYERS]: maxPlayers,
+      [rhit.FB_KEY_NUMROUNDS]: numRounds,
+      [rhit.FB_KEY_TIMEFORROUND]: roundTime,
+      [rhit.FB_KEY_PLAYERS]: [rhit.authManager.uid],
+      [rhit.FB_KEY_LISTS]: lists
+    }).then((docRef) => {
+      console.log("Document written with ID: ", docRef.id);
+      return docRef.id;
+    })
       .catch((error) => {
         console.error("Error adding document: ", error);
       });
@@ -683,12 +683,12 @@ rhit.FbSingleGameManager = class {
       // console.log(this._categories[i]);
       this._ref.collection("PlayerInputs").add({
         [rhit.FB_KEY_PLAYER]: rhit.authManager.uid,
-        [rhit.FB_KEY_ANSWER]:cates[i].children[1].value,
-        [rhit.FB_KEY_CATEGORY]:this._categories[i]
-        }).then((docRef) => {
-          console.log("Document written with ID: ", docRef.id);
-          // return docRef.id;
-        })
+        [rhit.FB_KEY_ANSWER]: cates[i].children[1].value,
+        [rhit.FB_KEY_CATEGORY]: this._categories[i]
+      }).then((docRef) => {
+        console.log("Document written with ID: ", docRef.id);
+        // return docRef.id;
+      })
         .catch((error) => {
           console.error("Error adding document: ", error);
         });
@@ -738,7 +738,30 @@ rhit.FbSingleGameManager = class {
 rhit.GameController = class {
   constructor() {
     rhit.fbSingleGameManager.beginListening(this.updateView.bind(this));
+
+    window.onbeforeunload = () => {
+      //code to make sure players answers are saved on refresh/exit the page. 
+      const myStorage = window.sessionStorage;
+      const cates = document.getElementById("categories").children;
+      for (let i = 0; i < cates.length; i++) {
+        myStorage.setItem(rhit.fbSingleGameManager._categories[i], cates[i].children[1].value);
+      }
+    }
   }
+
+  restoreAnswers() {
+    console.log("restoring answers");
+
+    const myStorage = window.sessionStorage;
+    const cates = document.getElementById("categories").children;
+    console.log("Got ans:", myStorage.get(rhit.fbSingleGameManager._categories[0]));
+    for (let i = 0; i < cates.length; i++) {
+      console.log("Got ans:", myStorage.get(rhit.fbSingleGameManager._categories[i]));
+      cates[i].children[1].value = myStorage.get(rhit.fbSingleGameManager._categories[i]);
+      myStorage.removeItem(rhit.fbSingleGameManager._categories[i]);
+    }
+  }
+
   updateView() {
     console.log("Update view")
 
@@ -795,6 +818,7 @@ rhit.GameController = class {
     letterBar.textContent = `Letter: ${rhit.fbSingleGameManager.randomLetter} `
     console.log("lists", rhit.fbSingleGameManager.randomList);
 
+    this.restoreAnswers();
 
   }
 
