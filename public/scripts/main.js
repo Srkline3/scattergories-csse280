@@ -28,6 +28,10 @@ rhit.FB_KEY_NUMROUNDS = "NumRounds";
 rhit.FB_KEY_PLAYERS = "Players";
 rhit.FB_KEY_TIMEFORROUND = "TimeforRound";
 rhit.FB_KEY_LISTS = "Lists";
+//gameinput collection
+rhit.FB_KEY_PLAYER = "Player";
+rhit.FB_KEY_CATEGORY="Category";
+rhit.FB_KEY_ANSWER="Answer";
 rhit.fbLobbyManager = null;
 rhit.authManager = null;
 rhit.fbSingleLobbyManager = null;
@@ -35,7 +39,7 @@ rhit.fbUsersManager = null;
 rhit.fbListsManager = null;
 rhit.fbGamesManager = null;
 rhit.fbSingleGameManager = null;
-
+rhit.gameTimer = null;
 /** HELPER FUNCTIONS */
 function htmlToElement(html) {
   var template = document.createElement('template');
@@ -47,24 +51,29 @@ function htmlToElement(html) {
 function getRandomInt(max) {
   return Math.floor(Math.random() * max);
 }
+
 function checkTime(i) {
-  if (i < 10) { i = "0" + i };
+  if (i < 10) {
+    i = "0" + i
+  };
   return i;
 }
 
 function showTimer() {
   let time = rhit.fbSingleGameManager.roundOverTime.toDate();
   let currentTime = new Date();
-  var distance = time-currentTime;
-  if (distance<=0){
-    clearInterval();
-    const timeBar =document.getElementById("timerText");
-    timeBar.textContent=`Time Out `
-  }else{
-    var  minutes = Math.floor((distance % (1000*60*60)) / 60000);
-    var seconds = Math.floor((distance % (1000*60)) / 1000);
-    const timeBar =document.getElementById("timerText");
-    timeBar.textContent=`Timer: ${minutes}:${seconds} `
+  var distance = time - currentTime;
+  if (distance <= 0) {
+    clearInterval(rhit.gameTimer);
+    rhit.gameTimer = null;
+    const timeBar = document.getElementById("timerText");
+    timeBar.textContent = `Time Out `;
+    rhit.fbSingleGameManager.timeOver();
+  } else {
+    var minutes = Math.floor((distance % (1000 * 60 * 60)) / 60000);
+    var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+    const timeBar = document.getElementById("timerText");
+    timeBar.textContent = `Timer: ${minutes}:${seconds} `
   }
 
   return distance;
@@ -181,7 +190,7 @@ rhit.AuthManager = class {
     this._avatar = avatar;
     this._username = username;
     firebase.auth().createUserWithEmailAndPassword(email, password)
-      .then(create => { })
+      .then(create => {})
       .catch((error) => {
         var errorCode = error.code;
         var errorMessage = error.message;
@@ -431,16 +440,16 @@ rhit.FbLobbyManager = class {
     console.log("create lobby...");
 
     return this._ref.add({
-      [rhit.FB_KEY_NAME]: name,
-      [rhit.FB_KEY_MAXPLAYERS]: maxPlayers,
-      [rhit.FB_KEY_NUMROUNDS]: numRounds,
-      [rhit.FB_KEY_TIMEFORROUND]: roundTime,
-      [rhit.FB_KEY_PLAYERS]: [rhit.authManager.uid],
-      [rhit.FB_KEY_LISTS]: lists
-    }).then((docRef) => {
-      console.log("Document written with ID: ", docRef.id);
-      return docRef.id;
-    })
+        [rhit.FB_KEY_NAME]: name,
+        [rhit.FB_KEY_MAXPLAYERS]: maxPlayers,
+        [rhit.FB_KEY_NUMROUNDS]: numRounds,
+        [rhit.FB_KEY_TIMEFORROUND]: roundTime,
+        [rhit.FB_KEY_PLAYERS]: [rhit.authManager.uid],
+        [rhit.FB_KEY_LISTS]: lists
+      }).then((docRef) => {
+        console.log("Document written with ID: ", docRef.id);
+        return docRef.id;
+      })
       .catch((error) => {
         console.error("Error adding document: ", error);
       });
@@ -646,7 +655,8 @@ rhit.FbSingleGameManager = class {
     this._documentSnapshot = {};
     this._unsub = null;
     this._ref = firebase.firestore().collection("Games").doc(gameId);
-
+    rhit.gameTimer = setInterval(showTimer, 1000);
+    this._categories = null;
   }
   async beginListening(changeListener) {
     this._ref.onSnapshot((doc => {
@@ -665,6 +675,37 @@ rhit.FbSingleGameManager = class {
     });
   }
 
+  timeOver() {
+    const cates = document.getElementById("categories").children;
+
+    for (var i = 0; i < cates.length; i++) {
+      // console.log(cates[i].children[1].value);
+      // console.log(this._categories[i]);
+      this._ref.collection("PlayerInputs").add({
+        [rhit.FB_KEY_PLAYER]: rhit.authManager.uid,
+        [rhit.FB_KEY_ANSWER]:cates[i].children[1].value,
+        [rhit.FB_KEY_CATEGORY]:this._categories[i]
+        }).then((docRef) => {
+          console.log("Document written with ID: ", docRef.id);
+          // return docRef.id;
+        })
+        .catch((error) => {
+          console.error("Error adding document: ", error);
+        });
+
+    }
+
+    console.log("time over called");
+  }
+
+  submitAnswers(answers) {
+    for (i = 0; i < answers.length; i++) {
+
+      // Update text input
+      console.log("input ", answers[i].value);
+
+    }
+  }
   get scores() {
     return this._documentSnapshot.get("Scores");
   }
@@ -688,12 +729,15 @@ rhit.FbSingleGameManager = class {
   get randomLetter() {
     return this._documentSnapshot.get("Letter");
   }
+
+  get isTimeOver() {
+    return !!rhit.gameTimer;
+  }
 }
 
 rhit.GameController = class {
   constructor() {
     rhit.fbSingleGameManager.beginListening(this.updateView.bind(this));
-
   }
   updateView() {
     console.log("Update view")
@@ -710,19 +754,19 @@ rhit.GameController = class {
 
     console.log("List for the round: ", listForThisRound);
 
-    rhit.fbListsManager.getListById(listForThisRound).then((list) =>{
+    rhit.fbListsManager.getListById(listForThisRound).then((list) => {
       const categories = list.categories;
+      rhit.fbSingleGameManager._categories = categories;
 
+      const categoriesHTML = htmlToElement('<form id="categories"></form>');
 
-      const categoriesHTML = htmlToElement('<div id="categories"></div>');
-
-      categories.forEach((catetory, index) =>{
+      categories.forEach((catetory, index) => {
         let categoryHTML = htmlToElement(
-        `<div class="form-group">
+          `<div class="form-group">
         <label for="inputAnswer${index}">${catetory}</label>
-        <input type="text" class="form-control" id="inputAnswer${index}">
+        <input type="text" class="form-control" id="inputAnswer${index}" />
         </div>`);
-        
+
         categoriesHTML.appendChild(categoryHTML);
       });
 
@@ -748,10 +792,10 @@ rhit.GameController = class {
     }
 
     const letterBar = document.getElementById("letterText");
-    letterBar.textContent=`Letter: ${rhit.fbSingleGameManager.randomLetter} `
+    letterBar.textContent = `Letter: ${rhit.fbSingleGameManager.randomLetter} `
     console.log("lists", rhit.fbSingleGameManager.randomList);
-    setInterval(showTimer,1000);
-   
+
+
   }
 
 
