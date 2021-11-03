@@ -750,16 +750,17 @@ rhit.GameController = class {
   }
 
   restoreAnswers() {
-    console.log("restoring answers");
-
     const myStorage = window.sessionStorage;
-    const cates = document.getElementById("categories").children;
-    console.log("Got ans:", myStorage.get(rhit.fbSingleGameManager._categories[0]));
-    for (let i = 0; i < cates.length; i++) {
-      console.log("Got ans:", myStorage.get(rhit.fbSingleGameManager._categories[i]));
-      cates[i].children[1].value = myStorage.get(rhit.fbSingleGameManager._categories[i]);
-      myStorage.removeItem(rhit.fbSingleGameManager._categories[i]);
-    }
+    const cates = document.getElementById("categories");
+    const list = rhit.fbSingleGameManager.currentList;
+    rhit.fbListsManager.getListById(list).then((list) => {
+      const categories = list.categories;
+      for (let i = 0; i < categories.length; i++) {
+        cates[i].value = myStorage.getItem(categories[i]);
+        myStorage.removeItem(categories[i]);
+      }
+    });
+    
   }
 
   updateView() {
@@ -798,6 +799,8 @@ rhit.GameController = class {
       oldCategories.removeAttribute("id");
 
       oldCategories.parentElement.appendChild(categoriesHTML);
+      
+      this.restoreAnswers();
 
     });
 
@@ -818,7 +821,6 @@ rhit.GameController = class {
     letterBar.textContent = `Letter: ${rhit.fbSingleGameManager.randomLetter} `
     console.log("lists", rhit.fbSingleGameManager.randomList);
 
-    this.restoreAnswers();
 
   }
 
