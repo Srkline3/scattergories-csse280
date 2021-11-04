@@ -41,6 +41,10 @@ rhit.fbGamesManager = null;
 rhit.fbSingleGameManager = null;
 rhit.fbPlayerInputsManager = null;
 rhit.gameTimer = null;
+<<<<<<< Updated upstream
+=======
+rhit.fbResultsManager = null;
+>>>>>>> Stashed changes
 
 /** HELPER FUNCTIONS */
 function htmlToElement(html) {
@@ -192,7 +196,7 @@ rhit.AuthManager = class {
     this._avatar = avatar;
     this._username = username;
     firebase.auth().createUserWithEmailAndPassword(email, password)
-      .then(create => { })
+      .then(create => {})
       .catch((error) => {
         var errorCode = error.code;
         var errorMessage = error.message;
@@ -442,16 +446,16 @@ rhit.FbLobbyManager = class {
     console.log("create lobby...");
 
     return this._ref.add({
-      [rhit.FB_KEY_NAME]: name,
-      [rhit.FB_KEY_MAXPLAYERS]: maxPlayers,
-      [rhit.FB_KEY_NUMROUNDS]: numRounds,
-      [rhit.FB_KEY_TIMEFORROUND]: roundTime,
-      [rhit.FB_KEY_PLAYERS]: [rhit.authManager.uid],
-      [rhit.FB_KEY_LISTS]: lists
-    }).then((docRef) => {
-      console.log("Document written with ID: ", docRef.id);
-      return docRef.id;
-    })
+        [rhit.FB_KEY_NAME]: name,
+        [rhit.FB_KEY_MAXPLAYERS]: maxPlayers,
+        [rhit.FB_KEY_NUMROUNDS]: numRounds,
+        [rhit.FB_KEY_TIMEFORROUND]: roundTime,
+        [rhit.FB_KEY_PLAYERS]: [rhit.authManager.uid],
+        [rhit.FB_KEY_LISTS]: lists
+      }).then((docRef) => {
+        console.log("Document written with ID: ", docRef.id);
+        return docRef.id;
+      })
       .catch((error) => {
         console.error("Error adding document: ", error);
       });
@@ -768,13 +772,13 @@ rhit.FbSingleGameManager = class {
       // console.log(cates[i].children[1].value);
       // console.log(this._categories[i]);
       this._ref.collection("PlayerInputs").add({
-        [rhit.FB_KEY_PLAYER]: rhit.authManager.uid,
-        [rhit.FB_KEY_ANSWER]: cates[i].children[1].value,
-        [rhit.FB_KEY_CATEGORY]: this._categories[i]
-      }).then((docRef) => {
-        console.log("Document written with ID: ", docRef.id);
-        // return docRef.id;
-      })
+          [rhit.FB_KEY_PLAYER]: rhit.authManager.uid,
+          [rhit.FB_KEY_ANSWER]: cates[i].children[1].value,
+          [rhit.FB_KEY_CATEGORY]: this._categories[i]
+        }).then((docRef) => {
+          console.log("Document written with ID: ", docRef.id);
+          // return docRef.id;
+        })
         .catch((error) => {
           console.error("Error adding document: ", error);
         });
@@ -787,14 +791,15 @@ rhit.FbSingleGameManager = class {
     window.location.href = `/vote.html?gameId=${rhit.fbSingleGameManager.gameId}&list=${rhit.fbSingleGameManager.currentList}&index=${0}`
   }
 
-  submitAnswers(answers) {
-    for (i = 0; i < answers.length; i++) {
+  // submitAnswers(answers) {
+  //   for (i = 0; i < answers.length; i++) {
 
-      // Update text input
-      console.log("input ", answers[i].value);
+  //     // Update text input
+  //     console.log("input ", answers[i].value);
 
-    }
-  }
+  //   }
+  // }
+
   get scores() {
     return this._documentSnapshot.get("Scores");
   }
@@ -823,6 +828,13 @@ rhit.FbSingleGameManager = class {
     return !!rhit.gameTimer;
   }
 
+<<<<<<< Updated upstream
+=======
+  get doneVoting() {
+    return this._documentSnapshot.get("DoneVoting");
+  }
+
+>>>>>>> Stashed changes
 }
 
 rhit.GameController = class {
@@ -889,9 +901,20 @@ rhit.GameController = class {
       oldCategories.removeAttribute("id");
 
       oldCategories.parentElement.appendChild(categoriesHTML);
+<<<<<<< Updated upstream
 
       this.restoreAnswers();
+=======
+>>>>>>> Stashed changes
 
+      this.restoreAnswers();
+      console.log("Is time over?", rhit.fbSingleGameManager.isTimeOver);
+      // console.log(rhit.fbSingleGameManager.playerInputs);
+      console.log("done voting", rhit.fbSingleGameManager.doneVoting);
+      if (rhit.fbSingleGameManager.doneVoting.includes(rhit.authManager.uid)) {
+        window.location.href = `/gameResult.html?gameId=${rhit.fbSingleGameManager.gameId}`
+      }
+      // if (rhit.fbSingleGameManager.doneVoting.)
     });
 
     console.log("Scores ", rhit.fbSingleGameManager.scores);
@@ -913,7 +936,67 @@ rhit.GameController = class {
 
 }
 
+rhit.FBResultsManager = class{
+  constructor(gameId){
+    
+      this.gameId = gameId;
+      this._documentSnapshot = {};
+      this._unsub = null;
+      this._ref = firebase.firestore().collection("Games").doc(gameId);
+      rhit.gameTimer = setInterval(showTimer, 1000);
+    }
+    async beginListening(changeListener) {
+      this._ref.onSnapshot((doc => {
+        if (doc.exists) {
+          this._documentSnapshot = doc;
+          changeListener();
+        } else {
+          //No GOOD
+        }
+      }));
+    }
 
+
+  getResults() {
+    let results = {};
+    results = this.scores;
+    console.log(results);
+    this.playerInputs.get().then((doc) => {
+      doc.forEach((d) => {
+        if (typeof d.get("Votes") !== 'undefined') {
+          results[d.get("Player")] += parseInt(d.get("Votes"));
+        }
+      })
+
+    }).then(() => {
+      console.log(results);
+      const playersResults = document.querySelector("#playersResult");
+      const htmlForResults = htmlToElement('<div id="playersResult"></div>');
+      Object.keys(results).forEach(key => {
+        let result = htmlToElement(
+          `<div class="row">
+          <div class="column">${key}</div>
+                        <div class="column">${results[key]}</div>
+                      </div>`);
+
+        htmlForResults.appendChild(result);
+      });
+    //  console.log(object);
+    playersResults.hidden=true;
+    playersResults.removeAttribute("id");
+
+    playersResults.parentElement.appendChild(htmlForResults);
+    });
+
+  }
+
+  get playerInputs() {
+    return this._ref.collection("PlayerInputs");
+  }
+  get scores() {
+    return this._documentSnapshot.get("Scores");
+  }
+}
 
 /** List CODE. */
 rhit.ListModel = class {
@@ -1016,7 +1099,13 @@ rhit.initializePage = function () {
     rhit.fbListsManager = new rhit.FbListsManager;
     rhit.fbSingleGameManager = new rhit.FbSingleGameManager(urlParams.get("gameId"));
     new rhit.GameController();
-  }
+  } 
+  if (document.getElementById("resultPage")) {
+    const urlParams = new URLSearchParams(window.location.search)
+    // rhit.fbListsManager = new rhit.FbListsManager;
+    rhit.fbResultsManager = new rhit.FBResultsManager(urlParams.get("gameId"));
+    new rhit.GameController();
+  } 
 
   if (document.getElementById("votePage")) {
     const urlParams = new URLSearchParams(window.location.search);
