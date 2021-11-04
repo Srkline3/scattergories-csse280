@@ -41,10 +41,7 @@ rhit.fbGamesManager = null;
 rhit.fbSingleGameManager = null;
 rhit.fbPlayerInputsManager = null;
 rhit.gameTimer = null;
-<<<<<<< Updated upstream
-=======
 rhit.fbResultsManager = null;
->>>>>>> Stashed changes
 
 /** HELPER FUNCTIONS */
 function htmlToElement(html) {
@@ -828,13 +825,10 @@ rhit.FbSingleGameManager = class {
     return !!rhit.gameTimer;
   }
 
-<<<<<<< Updated upstream
-=======
   get doneVoting() {
     return this._documentSnapshot.get("DoneVoting");
   }
 
->>>>>>> Stashed changes
 }
 
 rhit.GameController = class {
@@ -901,12 +895,6 @@ rhit.GameController = class {
       oldCategories.removeAttribute("id");
 
       oldCategories.parentElement.appendChild(categoriesHTML);
-<<<<<<< Updated upstream
-
-      this.restoreAnswers();
-=======
->>>>>>> Stashed changes
-
       this.restoreAnswers();
       console.log("Is time over?", rhit.fbSingleGameManager.isTimeOver);
       // console.log(rhit.fbSingleGameManager.playerInputs);
