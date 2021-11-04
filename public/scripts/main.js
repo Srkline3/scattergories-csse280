@@ -931,7 +931,6 @@ rhit.FBResultsManager = class{
       this._documentSnapshot = {};
       this._unsub = null;
       this._ref = firebase.firestore().collection("Games").doc(gameId);
-      rhit.gameTimer = setInterval(showTimer, 1000);
     }
     async beginListening(changeListener) {
       this._ref.onSnapshot((doc => {
@@ -958,22 +957,28 @@ rhit.FBResultsManager = class{
 
     }).then(() => {
       console.log(results);
-      const playersResults = document.querySelector("#playersResult");
-      const htmlForResults = htmlToElement('<div id="playersResult"></div>');
-      Object.keys(results).forEach(key => {
-        let result = htmlToElement(
-          `<div class="row">
-          <div class="column">${key}</div>
-                        <div class="column">${results[key]}</div>
-                      </div>`);
-
-        htmlForResults.appendChild(result);
+      const htmlForResults = document.querySelector("#playersResult");
+      var maxScore = Math.max(...Object.values(results));
+      var winner = Object.keys(results).filter(function(x){ return results[x] == maxScore; });
+      console.log(winner);
+      var resultTitle = document.querySelector("#resultTitle");
+      if(winner.includes(rhit.authManager.uid)){
+        resultTitle.innerHTML="You Won!"
+      }else{
+        resultTitle.innerHTML="You Lose!"
+      }
+      Object.keys(results).forEach(player => {
+        rhit.fbUsersManager.getUserInfo(player).then((playerModel) => {
+          let result = htmlToElement(
+            `<div class="row">
+            <div class="column">${playerModel.username}</div>
+                          <div class="column">${results[player]}</div>
+                        </div>`);
+  
+          htmlForResults.appendChild(result);
+        });
+        
       });
-    //  console.log(object);
-    playersResults.hidden=true;
-    playersResults.removeAttribute("id");
-
-    playersResults.parentElement.appendChild(htmlForResults);
     });
 
   }
@@ -985,7 +990,18 @@ rhit.FBResultsManager = class{
     return this._documentSnapshot.get("Scores");
   }
 }
+rhit.ResultsController= class{
 
+  constructor() {
+    
+    rhit.fbResultsManager.beginListening(this.updateView.bind(this));
+  }
+
+  updateView() {
+    
+    rhit.fbResultsManager.getResults();
+}
+}
 /** List CODE. */
 rhit.ListModel = class {
   constructor(id, name, owner, categories, isPublic) {
@@ -1090,9 +1106,8 @@ rhit.initializePage = function () {
   } 
   if (document.getElementById("resultPage")) {
     const urlParams = new URLSearchParams(window.location.search)
-    // rhit.fbListsManager = new rhit.FbListsManager;
     rhit.fbResultsManager = new rhit.FBResultsManager(urlParams.get("gameId"));
-    new rhit.GameController();
+    new rhit.ResultsController();
   } 
 
   if (document.getElementById("votePage")) {
