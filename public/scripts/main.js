@@ -39,7 +39,9 @@ rhit.fbUsersManager = null;
 rhit.fbListsManager = null;
 rhit.fbGamesManager = null;
 rhit.fbSingleGameManager = null;
+rhit.fbPlayerInputsManager = null;
 rhit.gameTimer = null;
+
 /** HELPER FUNCTIONS */
 function htmlToElement(html) {
   var template = document.createElement('template');
@@ -633,6 +635,87 @@ rhit.FbSingleLobbyManager = class {
   }
 }
 
+/*Voting CODE*/
+rhit.PlayerInputModel = class {
+  constructor(answer, category, player) {
+    this.answer = answer;
+    this.category = category;
+    this.player = player;
+  }
+}
+
+rhit.VoteController = class {
+  constructor(list, index) {
+    this.index = index;
+    this.list = list;
+    rhit.fbPlayerInputsManager.beginListening(this.updateView.bind(this));
+
+
+
+  }
+
+  updateView() {
+    const playerInputs = rhit.fbPlayerInputsManager.playerInputs;
+    rhit.fbListsManager.getListById(this.list).then((list) => {
+      const category = list.categories[this.index];
+      const inputsForThisCategory = playerInputs.filter(input => input.category == category);
+
+      const oldAnswers = document.getElementById("votingStuff");
+      const newAnswers = htmlToElement('<div id="votingStuff"></div>');
+
+      inputsForThisCategory.forEach((input) => {
+        const inputHtml = htmlToElement(`
+        <form id="playerAnswers">
+        <div class="voteRow">
+          <h2>${input.answer}</h2>
+          <div class="voteButtons">
+              <button type="button">Yes!</button>
+              <button type="button">No!</button>
+          </div>
+        </div>
+        </form>
+        `);
+
+        //Give the div a value that we change on click. Then when the submit button is hit, we need to get all the vals from the divs and submit them.
+
+        newAnswers.appendChild(inputHtml);
+      });
+
+      oldAnswers.hidden = true;
+      oldAnswers.removeAttribute("id");
+      oldAnswers.parentElement.appendChild(newAnswers);
+    });
+  }
+}
+
+rhit.FbPlayerInputsManager = class {
+  constructor(gameId) {
+    this.gameId = gameId;
+    this._documentSnapshots = [];
+    this._unsub = null;
+    this._ref = firebase.firestore().collection(`Games/${gameId}/PlayerInputs`);
+  }
+
+  beginListening(changeListener) {
+    this._unsub = this._ref.onSnapshot((qs) => {
+      this._documentSnapshots = qs.docs;
+      changeListener();
+    });
+  }
+
+  get playerInputs() {
+    const inputs = [];
+    const inputCol = this._documentSnapshots;
+    console.log("Col", inputCol);
+    inputCol.forEach((doc) => {
+      inputs.push(new rhit.PlayerInputModel(doc.get("Answer"), doc.get("Category"), doc.get("Player")));
+    });
+
+    return inputs;
+  }
+
+}
+
 
 /** Game CODE. */
 rhit.GameModel = class {
@@ -655,7 +738,10 @@ rhit.FbSingleGameManager = class {
     this._documentSnapshot = {};
     this._unsub = null;
     this._ref = firebase.firestore().collection("Games").doc(gameId);
+
     rhit.gameTimer = setInterval(showTimer, 1000);
+
+
     this._categories = null;
   }
   async beginListening(changeListener) {
@@ -695,7 +781,10 @@ rhit.FbSingleGameManager = class {
 
     }
 
+    alert("Times up!");
+
     console.log("time over called");
+    window.location.href = `/vote.html?gameId=${rhit.fbSingleGameManager.gameId}&list=${rhit.fbSingleGameManager.currentList}&index=${0}`
   }
 
   submitAnswers(answers) {
@@ -733,6 +822,7 @@ rhit.FbSingleGameManager = class {
   get isTimeOver() {
     return !!rhit.gameTimer;
   }
+
 }
 
 rhit.GameController = class {
@@ -760,7 +850,7 @@ rhit.GameController = class {
         myStorage.removeItem(categories[i]);
       }
     });
-    
+
   }
 
   updateView() {
@@ -799,14 +889,10 @@ rhit.GameController = class {
       oldCategories.removeAttribute("id");
 
       oldCategories.parentElement.appendChild(categoriesHTML);
-      
+
       this.restoreAnswers();
 
     });
-
-
-
-
 
     console.log("Scores ", rhit.fbSingleGameManager.scores);
     const playersInfo = document.getElementsByClassName("dropdown-content");
@@ -903,7 +989,6 @@ rhit.checkForRedirects = function () {
     rhit.authManager.signOut();
     window.location.href = "/";
   } else if (!(document.querySelector("#mainPage") || document.querySelector("#signinPage") || document.querySelector("#signupPage")) && !rhit.authManager.isSignedIn) {
-    console.log("aefkaj;eiofja;eiofjae'iofajefaEGAEOGJZGJAAE:ROGJAEAE:AJE:RKOGARLGKALLRG");
     window.location.href = "/";
   }
 };
@@ -931,6 +1016,13 @@ rhit.initializePage = function () {
     rhit.fbListsManager = new rhit.FbListsManager;
     rhit.fbSingleGameManager = new rhit.FbSingleGameManager(urlParams.get("gameId"));
     new rhit.GameController();
+  }
+
+  if (document.getElementById("votePage")) {
+    const urlParams = new URLSearchParams(window.location.search);
+    rhit.fbPlayerInputsManager = new rhit.FbPlayerInputsManager(urlParams.get("gameId"));
+    rhit.fbListsManager = new rhit.FbListsManager;
+    new rhit.VoteController(urlParams.get("list"), urlParams.get("index"));
   }
 
 
