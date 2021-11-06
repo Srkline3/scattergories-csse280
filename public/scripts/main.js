@@ -649,6 +649,7 @@ rhit.VoteController = class {
     this.index = index;
     this.list = list;
     rhit.fbPlayerInputsManager.beginListening(this.updateView.bind(this));
+    this.votes = {};
 
 
 
@@ -668,9 +669,9 @@ rhit.VoteController = class {
         <form id="playerAnswers">
         <div class="voteRow">
           <h2>${input.answer}</h2>
-          <div class="voteButtons">
-              <button type="button">Yes!</button>
-              <button type="button">No!</button>
+          <div id=${input.player}-buttons data-val="-1" class="voteButtons">
+              <button onclick=voteClick(${input.player}, YES) type="button">Yes!</button>
+              <button onclick=voteClick(${input.player}, NO) type="button">No!</button>
           </div>
         </div>
         </form>
@@ -909,10 +910,7 @@ rhit.GameController = class {
 
 
   }
-
-
 }
-
 
 
 /** List CODE. */
