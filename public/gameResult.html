@@ -2,70 +2,63 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
-    <link rel="stylesheet" href="styles/bootstrap-material-design.min.css">
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/result.css">
-    <title>Scattergories</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
+  <link rel="stylesheet" href="styles/bootstrap-material-design.min.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/result.css">
+  <title>Scattergories</title>
 </head>
 
 <body>
-    <div class="bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay">
-		<header class="bmd-layout-header">
-		  <div class="navbar navbar-dark bg-faded justify-content-start">
-			<button class="navbar-toggler" type="button" data-toggle="drawer" data-target="#dw-s1">
-			  <span class="sr-only">Toggle drawer</span>
-			  <i class="material-icons">menu</i>
-			</button>
-            <a class="navbar-brand" href="./lobby.html">&nbsp;&nbsp;Scattergories</a>
-		  </div>
-		</header>
-		<div id="dw-s1" class="bmd-layout-drawer bg-faded">
-		  <header>
-			<a class="navbar-brand">Scattergories</a>
-		  </header>
-		  <ul class="list-group">
-			<a class="list-group-item" id="menuSignOut"><i class="material-icons">login</i>Sign Out</a>
-		  </ul>
-		</div>
-        <main class="bmd-layout-content">
-            <div id="votePage" class="container page-container">
-
-                <h1 id="resultTitle" >You won!</h1>
-                <hr>
-                <div id="playersResult">
-                   <div class="row">
-                        <div class="column"> Trey:</div>
-                        <div class="column">16</div>
-                      </div>
-                      <div class="row">
-                        <div class="column"> Shannon:</div>
-                        <div class="column">16</div>
-                      </div>
-                    </div>
-        
-                <div id="resultBtnGroup">
-                    <button id="submitVoteBtn" class="btn our-button-active">Play Again</button>
-                    <button id="submitVoteBtn" class="btn our-button-active">Exit Lobby</button>
-                </div>
-        
-        
-            </div>
-        </main>
+  <div class="bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay">
+    <header class="bmd-layout-header">
+      <div class="navbar navbar-dark bg-faded justify-content-start">
+        <button class="navbar-toggler" type="button" data-toggle="drawer" data-target="#dw-s1">
+          <span class="sr-only">Toggle drawer</span>
+          <i class="material-icons">menu</i>
+        </button>
+        <a class="navbar-brand" href="./lobby.html">&nbsp;&nbsp;Scattergories</a>
+      </div>
+    </header>
+    <div id="dw-s1" class="bmd-layout-drawer bg-faded">
+      <header>
+        <a class="navbar-brand">Scattergories</a>
+      </header>
+      <ul class="list-group">
+        <a class="list-group-item" id="menuSignOut"><i class="material-icons">login</i>Sign Out</a>
+      </ul>
     </div>
-    
-    <script src="scripts/jquery.min.js"></script>
-    <script src="scripts/popper.js"></script>
-    <script src="scripts/bootstrap-material-design.js"></script>
-    <script>$("body").bootstrapMaterialDesign();</script>
-    <script src="/__/firebase/7.18.0/firebase-app.js"></script>
-    <script src="/__/firebase/7.18.0/firebase-analytics.js"></script>
-    <script src="/__/firebase/7.18.0/firebase-auth.js"></script>
-    <script src="/__/firebase/7.18.0/firebase-firestore.js"></script>
-    <script src="/__/firebase/init.js"></script>
-    <script src="scripts/main.js"></script>
+    <main class="bmd-layout-content">
+      <div id="resultPage" class="container page-container">
+
+        <h1 id="resultTitle"></h1>
+        <hr>
+        <div id="playersResult">
+        </div>
+        <div id="resultBtnGroup">
+          <button id="submitVoteBtn" class="btn our-button-active">Play Again</button>
+          <button id="submitVoteBtn" class="btn our-button-active">Exit Lobby</button>
+        </div>
+
+
+      </div>
+    </main>
+  </div>
+
+  <script src="scripts/jquery.min.js"></script>
+  <script src="scripts/popper.js"></script>
+  <script src="scripts/bootstrap-material-design.js"></script>
+  <script>
+    $("body").bootstrapMaterialDesign();
+  </script>
+  <script src="/__/firebase/7.18.0/firebase-app.js"></script>
+  <script src="/__/firebase/7.18.0/firebase-analytics.js"></script>
+  <script src="/__/firebase/7.18.0/firebase-auth.js"></script>
+  <script src="/__/firebase/7.18.0/firebase-firestore.js"></script>
+  <script src="/__/firebase/init.js"></script>
+  <script src="scripts/main.js"></script>
 </body>
 
 </html>
