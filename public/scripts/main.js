@@ -193,7 +193,7 @@ rhit.AuthManager = class {
     this._avatar = avatar;
     this._username = username;
     firebase.auth().createUserWithEmailAndPassword(email, password)
-      .then(create => {})
+      .then(create => { })
       .catch((error) => {
         var errorCode = error.code;
         var errorMessage = error.message;
@@ -443,16 +443,16 @@ rhit.FbLobbyManager = class {
     console.log("create lobby...");
 
     return this._ref.add({
-        [rhit.FB_KEY_NAME]: name,
-        [rhit.FB_KEY_MAXPLAYERS]: maxPlayers,
-        [rhit.FB_KEY_NUMROUNDS]: numRounds,
-        [rhit.FB_KEY_TIMEFORROUND]: roundTime,
-        [rhit.FB_KEY_PLAYERS]: [rhit.authManager.uid],
-        [rhit.FB_KEY_LISTS]: lists
-      }).then((docRef) => {
-        console.log("Document written with ID: ", docRef.id);
-        return docRef.id;
-      })
+      [rhit.FB_KEY_NAME]: name,
+      [rhit.FB_KEY_MAXPLAYERS]: maxPlayers,
+      [rhit.FB_KEY_NUMROUNDS]: numRounds,
+      [rhit.FB_KEY_TIMEFORROUND]: roundTime,
+      [rhit.FB_KEY_PLAYERS]: [rhit.authManager.uid],
+      [rhit.FB_KEY_LISTS]: lists
+    }).then((docRef) => {
+      console.log("Document written with ID: ", docRef.id);
+      return docRef.id;
+    })
       .catch((error) => {
         console.error("Error adding document: ", error);
       });
@@ -498,6 +498,9 @@ rhit.LobbyController = class {
       currentTime.setMinutes(currentTime.getMinutes() + rhit.fbSingleLobbyManager.timeforRound);
       newGame.lists = rhit.fbSingleLobbyManager.lists;
       newGame.roundOverTime = currentTime;
+      newGame.rounds = rhit.fbSingleLobbyManager.numRounds;
+      newGame.currentRound = 1;
+      newGame.timeForRound = rhit.fbSingleLobbyManager.timeforRound;
       rhit.fbSingleLobbyManager.addGame(newGame).then((game) => {
 
         console.log("Starting game:", game)
@@ -576,7 +579,10 @@ rhit.FbSingleLobbyManager = class {
   }
   get timeforRound() {
     return this._documentSnapshot.get("TimeforRound");
+  }
 
+  get numRounds() {
+    return this._documentSnapshot.get("NumRounds")
   }
 
   deleteLobby() {
@@ -617,6 +623,9 @@ rhit.FbSingleLobbyManager = class {
       Scores: assignScores,
       Lists: game.lists,
       Letter: String.fromCharCode(65 + Math.floor(Math.random() * 26)),
+      Rounds: game.rounds,
+      CurrentRound: game.currentRound,
+      TimeforRound: game.timeForRound
     }).then((docRef) => {
       console.log("Document written with ID: ", docRef.id);
       game.scores = assignScores;
@@ -647,20 +656,72 @@ rhit.PlayerInputModel = class {
 
 rhit.VoteController = class {
   constructor(list, index) {
-    this.index = index;
+    this.index = parseInt(index);
     this.list = list;
     rhit.fbPlayerInputsManager.beginListening(this.updateView.bind(this));
     this.votes = {};
 
+    //submit click listener 
+    document.getElementById("submitVoteBtn").onclick = (event) => {
+      rhit.fbPlayerInputsManager.getScore().then((score) => {
+        const voters = Object.keys(this.votes);
+        for (let voter of voters) {
+          console.log("Score", score[voter]);
+          console.log("Votes", this.votes[voter])
+          this.votes[voter] = this.votes[voter] + score[voter];
+        }
+        console.log(this.votes);
 
 
+        rhit.fbPlayerInputsManager.updateScore(this.votes).then((idk) => {
+          if (this.index >= 11) {
+            //TODO: Round over code!
+            rhit.fbPlayerInputsManager.listenForVotingDone(this.doneVotingHandler.bind(this));
+            rhit.fbPlayerInputsManager.votingDone();
+
+          } else {
+            const newIndex = this.index + 1;
+            window.location.href = `/vote.html?gameId=${rhit.fbPlayerInputsManager.gameId}&list=${this.list}&index=${newIndex}`
+          }
+        });
+      })
+    }
+  }
+
+  doneVotingHandler() {
+    rhit.fbPlayerInputsManager.getGame().then((game) => {
+      console.log("Game: ", game.currentRound);
+      console.log("num rounds", game.rounds)
+      if (game.currentRound < game.rounds) {
+        console.log("Time for round", game.timeForRound)
+
+        let currentTime = firebase.firestore.Timestamp.now().toDate();
+        currentTime.setMinutes(currentTime.getMinutes() + game.timeForRound);
+        game.roundOverTime = currentTime;
+        game.currentRound = game.currentRound + 1;
+        game.letter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+        rhit.fbPlayerInputsManager.updateGame(game).then(() => {
+          window.location.href = `/gameMain.html?gameId=${game.id}`
+        });
+      } else {
+        //TODO: navigate to results page
+        window.location.href = `/gameResult.html?gameId=${game.id}`
+      }
+
+
+
+    });
   }
 
   updateView() {
     const playerInputs = rhit.fbPlayerInputsManager.playerInputs;
+
+
     rhit.fbListsManager.getListById(this.list).then((list) => {
       const category = list.categories[this.index];
       const inputsForThisCategory = playerInputs.filter(input => input.category == category);
+
+      document.getElementById("VoteCateName").innerHTML = "Category: " + category;
 
       const oldAnswers = document.getElementById("votingStuff");
       const newAnswers = htmlToElement('<div id="votingStuff"></div>');
@@ -671,8 +732,8 @@ rhit.VoteController = class {
         <div class="voteRow">
           <h2>${input.answer}</h2>
           <div id=${input.player}-buttons data-val="-1" class="voteButtons">
-              <button onclick=voteClick(${input.player}, YES) type="button">Yes!</button>
-              <button onclick=voteClick(${input.player}, NO) type="button">No!</button>
+              <button id="${input.player}-yes" class="voteButton" type="button">Yes!</button>
+              <button id="${input.player}-no" class="voteButton" type="button">No!</button>
           </div>
         </div>
         </form>
@@ -686,8 +747,41 @@ rhit.VoteController = class {
       oldAnswers.hidden = true;
       oldAnswers.removeAttribute("id");
       oldAnswers.parentElement.appendChild(newAnswers);
+
+      inputsForThisCategory.forEach((input) => {
+        document.getElementById(input.player + "-yes").onclick = (event) => {
+          this.voteButton(input.player, 1);
+          document.getElementById(input.player + "-buttons").dataset.val = 1;
+        }
+
+        document.getElementById(input.player + "-no").onclick = (event) => {
+          this.voteButton(input.player, 0);
+          document.getElementById(input.player + "-buttons").dataset.val = 0;
+        }
+      });
     });
   }
+  voteButton(player, vote) {
+    this.votes[player] = vote;
+    console.log(this.votes);
+    this.changeButtonColors(player, vote);
+  }
+
+  changeButtonColors(player, vote) {
+    const no = document.getElementById(player + "-no");
+    const yes = document.getElementById(player + "-yes");
+    if (vote == 0) {
+      no.style.backgroundColor = "red";
+      yes.style.backgroundColor = "gray";
+    }
+    if (vote == 1) {
+      no.style.backgroundColor = "gray";
+      yes.style.backgroundColor = "green";
+    }
+  }
+
+
+
 }
 
 rhit.FbPlayerInputsManager = class {
@@ -696,12 +790,66 @@ rhit.FbPlayerInputsManager = class {
     this._documentSnapshots = [];
     this._unsub = null;
     this._ref = firebase.firestore().collection(`Games/${gameId}/PlayerInputs`);
+    this.gameRef = firebase.firestore().collection(`Games`).doc(this.gameId);
   }
 
   beginListening(changeListener) {
     this._unsub = this._ref.onSnapshot((qs) => {
       this._documentSnapshots = qs.docs;
       changeListener();
+    });
+  }
+
+  listenForVotingDone(votingDoneHandler) {
+    this.gameRef.onSnapshot((qs) => {
+      console.log("Done", qs.get("DoneVoting").length);
+      console.log("Players", qs.get("Players").length);
+      if (qs.get("DoneVoting").length == qs.get("Players").length) {
+        votingDoneHandler();
+      }
+    })
+  }
+
+  votingDone() {
+    return this.gameRef.update({
+      DoneVoting: firebase.firestore.FieldValue.arrayUnion(rhit.authManager.uid)
+    });
+  }
+  getScore() {
+    return this.gameRef.get().then((doc) => {
+      return doc.get("Scores");
+    });
+  }
+
+  updateScore(scores) {
+    console.log("updating", scores);
+    return this.gameRef.update({
+      Scores: scores
+    });
+  }
+
+  getGame() {
+    return this.gameRef.get().then((doc) => {
+      let game = new rhit.GameModel(doc.id, doc.get("Players"));
+      game.currentList = doc.get("CurrentList");
+      game.doneVoting = doc.get("DoneVoting");
+      game.gameOver = doc.get("GameOver");
+      game.letter = doc.get("Letter");
+      game.lists = doc.get("Lists");
+      game.roundOverTime = doc.get("RoundOverTime");
+      game.scores = doc.get("Scores");
+      game.currentRound = doc.get("CurrentRound");
+      game.rounds = doc.get("Rounds");
+      game.timeForRound = doc.get("TimeforRound");
+      return game;
+    })
+  }
+
+  updateGame(game) {
+    return this.gameRef.update({
+      Letter: game.letter,
+      CurrentRound: game.currentRound,
+      RoundOverTime: game.roundOverTime,
     });
   }
 
@@ -730,7 +878,9 @@ rhit.GameModel = class {
     this.scores = {};
     this.playerInputs = [];
     this.lists = [];
-
+    this.rounds = 0;
+    this.currentRound = 0;
+    this.timeForRound = 0;
   }
 }
 
@@ -770,13 +920,13 @@ rhit.FbSingleGameManager = class {
       // console.log(cates[i].children[1].value);
       // console.log(this._categories[i]);
       this._ref.collection("PlayerInputs").add({
-          [rhit.FB_KEY_PLAYER]: rhit.authManager.uid,
-          [rhit.FB_KEY_ANSWER]: cates[i].children[1].value,
-          [rhit.FB_KEY_CATEGORY]: this._categories[i]
-        }).then((docRef) => {
-          console.log("Document written with ID: ", docRef.id);
-          // return docRef.id;
-        })
+        [rhit.FB_KEY_PLAYER]: rhit.authManager.uid,
+        [rhit.FB_KEY_ANSWER]: cates[i].children[1].value,
+        [rhit.FB_KEY_CATEGORY]: this._categories[i]
+      }).then((docRef) => {
+        console.log("Document written with ID: ", docRef.id);
+        // return docRef.id;
+      })
         .catch((error) => {
           console.error("Error adding document: ", error);
         });
@@ -900,9 +1050,9 @@ rhit.GameController = class {
       console.log("Is time over?", rhit.fbSingleGameManager.isTimeOver);
       // console.log(rhit.fbSingleGameManager.playerInputs);
       console.log("done voting", rhit.fbSingleGameManager.doneVoting);
-      if (rhit.fbSingleGameManager.doneVoting.includes(rhit.authManager.uid)) {
-        window.location.href = `/gameResult.html?gameId=${rhit.fbSingleGameManager.gameId}`
-      }
+      // if (rhit.fbSingleGameManager.doneVoting.includes(rhit.authManager.uid)) {
+      //   window.location.href = `/gameResult.html?gameId=${rhit.fbSingleGameManager.gameId}`
+      // }
       // if (rhit.fbSingleGameManager.doneVoting.)
     });
 
@@ -923,24 +1073,24 @@ rhit.GameController = class {
   }
 }
 
-rhit.FBResultsManager = class{
-  constructor(gameId){
-    
-      this.gameId = gameId;
-      this._documentSnapshot = {};
-      this._unsub = null;
-      this._ref = firebase.firestore().collection("Games").doc(gameId);
-    }
-    async beginListening(changeListener) {
-      this._ref.onSnapshot((doc => {
-        if (doc.exists) {
-          this._documentSnapshot = doc;
-          changeListener();
-        } else {
-          //No GOOD
-        }
-      }));
-    }
+rhit.FBResultsManager = class {
+  constructor(gameId) {
+
+    this.gameId = gameId;
+    this._documentSnapshot = {};
+    this._unsub = null;
+    this._ref = firebase.firestore().collection("Games").doc(gameId);
+  }
+  async beginListening(changeListener) {
+    this._ref.onSnapshot((doc => {
+      if (doc.exists) {
+        this._documentSnapshot = doc;
+        changeListener();
+      } else {
+        //No GOOD
+      }
+    }));
+  }
 
 
   getResults() {
@@ -958,13 +1108,13 @@ rhit.FBResultsManager = class{
       console.log(results);
       const htmlForResults = document.querySelector("#playersResult");
       var maxScore = Math.max(...Object.values(results));
-      var winner = Object.keys(results).filter(function(x){ return results[x] == maxScore; });
+      var winner = Object.keys(results).filter(function (x) { return results[x] == maxScore; });
       console.log(winner);
       var resultTitle = document.querySelector("#resultTitle");
-      if(winner.includes(rhit.authManager.uid)){
-        resultTitle.innerHTML="You Won!"
-      }else{
-        resultTitle.innerHTML="You Lose!"
+      if (winner.includes(rhit.authManager.uid)) {
+        resultTitle.innerHTML = "You Won!"
+      } else {
+        resultTitle.innerHTML = "You Lose!"
       }
       Object.keys(results).forEach(player => {
         rhit.fbUsersManager.getUserInfo(player).then((playerModel) => {
@@ -973,10 +1123,10 @@ rhit.FBResultsManager = class{
             <div class="column">${playerModel.username}</div>
                           <div class="column">${results[player]}</div>
                         </div>`);
-  
+
           htmlForResults.appendChild(result);
         });
-        
+
       });
     });
 
@@ -989,17 +1139,17 @@ rhit.FBResultsManager = class{
     return this._documentSnapshot.get("Scores");
   }
 }
-rhit.ResultsController= class{
+rhit.ResultsController = class {
 
   constructor() {
-    
+
     rhit.fbResultsManager.beginListening(this.updateView.bind(this));
   }
 
   updateView() {
-    
+
     rhit.fbResultsManager.getResults();
-}
+  }
 }
 /** List CODE. */
 rhit.ListModel = class {
@@ -1102,12 +1252,12 @@ rhit.initializePage = function () {
     rhit.fbListsManager = new rhit.FbListsManager;
     rhit.fbSingleGameManager = new rhit.FbSingleGameManager(urlParams.get("gameId"));
     new rhit.GameController();
-  } 
+  }
   if (document.getElementById("resultPage")) {
     const urlParams = new URLSearchParams(window.location.search)
     rhit.fbResultsManager = new rhit.FBResultsManager(urlParams.get("gameId"));
     new rhit.ResultsController();
-  } 
+  }
 
   if (document.getElementById("votePage")) {
     const urlParams = new URLSearchParams(window.location.search);
