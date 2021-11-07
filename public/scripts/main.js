@@ -37,6 +37,7 @@ rhit.authManager = null;
 rhit.fbSingleLobbyManager = null;
 rhit.fbUsersManager = null;
 rhit.fbListsManager = null;
+rhit.fbPublicListsManager=null;
 rhit.fbGamesManager = null;
 rhit.fbSingleGameManager = null;
 rhit.fbPlayerInputsManager = null;
@@ -1183,6 +1184,12 @@ rhit.FbListsManager = class {
     });
 
   }
+  editMyList(){
+
+  }
+  publicMyList(myListId){
+    
+  }
 
   get customLists() {
     let lists = [];
@@ -1213,6 +1220,37 @@ rhit.FbListsManager = class {
   }
 
 }
+rhit.FbPublicListsManager = class {
+  constructor() {
+    this._documentSnapshots = [];
+    this._ref = firebase.firestore().collection("Lists");
+    this._unsub = null;
+  }
+
+  beginListening(changeListener) {
+    this._unsub = this._ref.onSnapshot((qs) => {
+      this._documentSnapshots = qs.docs;
+      changeListener();
+    });
+  }
+
+  getListById(id) {
+    return this._ref.doc(id).get().then((list) => {
+      return new rhit.ListModel(list.id, list.get("Name"), list.get("Owner"), list.get("Categories"), list.get("public"));
+    });
+
+  }
+ 
+
+}
+rhit.ListController = class{
+  constructor(){
+
+  }
+
+  
+}
+
 
 /** INIT CODE. */
 
@@ -1264,6 +1302,13 @@ rhit.initializePage = function () {
     rhit.fbPlayerInputsManager = new rhit.FbPlayerInputsManager(urlParams.get("gameId"));
     rhit.fbListsManager = new rhit.FbListsManager;
     new rhit.VoteController(urlParams.get("list"), urlParams.get("index"));
+  }
+  if(document.getElementById("myListPage")){
+    rhit.fbListsManager = new rhit.FbListsManager;
+    new rhit.ListController();
+  }if (document.getElementById("publicListPage")){
+    rhit.fbPublicListsManager = new rhit.FbPublicListsManager;
+    new rhit.ListController();
   }
 
 
