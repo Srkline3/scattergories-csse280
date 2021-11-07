@@ -159,7 +159,6 @@ rhit.AuthManager = class {
                 [rhit.FB_KEY_USERNAME]: this._username,
                 [rhit.FB_KEY_AVATAR]: this._avatar,
                 [rhit.FB_KEY_NUMLOSE]: 0,
-                [rhit.FB_KEY_NUMTIE]: 0,
                 [rhit.FB_KEY_NUMWIN]: 0,
                 [rhit.FB_KEY_NUMTOTALGAME]: 0,
               }).then((user) => {
