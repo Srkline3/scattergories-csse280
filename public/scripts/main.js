@@ -37,7 +37,7 @@ rhit.authManager = null;
 rhit.fbSingleLobbyManager = null;
 rhit.fbUsersManager = null;
 rhit.fbListsManager = null;
-rhit.fbPublicListsManager=null;
+rhit.fbPublicListsManager = null;
 rhit.fbGamesManager = null;
 rhit.fbSingleGameManager = null;
 rhit.fbPlayerInputsManager = null;
@@ -237,33 +237,45 @@ rhit.FbUsersManager = class {
     return this._ref.doc(userId).get().then((snapshot) => {
       return new rhit.UserModel(snapshot.id, snapshot.get("Username"));
     });
-
   }
-  updateUserGameStats(isWin){
+
+  // getUsersInfo(users) {
+  //   //I think this will fail if you try it with more than 10 users
+  //   console.log("Users", users);
+  //   return this._ref.where("uid", "in", users).get().then((qs) => {
+  //     let info = [];
+  //     qs.forEach((doc) => {
+  //       info.push(new rhit.UserModel(doc.id, doc.get("Username")))
+  //     });
+  //     return info;
+  //   });
+  // }
+
+  updateUserGameStats(isWin) {
     let totalGames = 0;
-    if(isWin){
-      let currentWin =0;
-      this._ref.doc(rhit.authManager.uid).get().then((doc)=>{
-        currentWin = parseInt(doc.get("#Win")) ;
-        totalGames =parseInt(doc.get("#TotalGame"));
-      }).then(()=>{
+    if (isWin) {
+      let currentWin = 0;
+      this._ref.doc(rhit.authManager.uid).get().then((doc) => {
+        currentWin = parseInt(doc.get("#Win"));
+        totalGames = parseInt(doc.get("#TotalGame"));
+      }).then(() => {
         this._ref.doc(rhit.authManager.uid).update({
-          [rhit.FB_KEY_NUMWIN]:currentWin+1,
-          [rhit.FB_KEY_NUMTOTALGAME]:totalGames+1
+          [rhit.FB_KEY_NUMWIN]: currentWin + 1,
+          [rhit.FB_KEY_NUMTOTALGAME]: totalGames + 1
         })
       });
-      
-    }else{
-      let currentLose =0;
-      this._ref.doc(rhit.authManager.uid).get().then((doc)=>{
-        currentLose = parseInt(doc.get("#Lose")) ;
-      }).then(()=>{
+
+    } else {
+      let currentLose = 0;
+      this._ref.doc(rhit.authManager.uid).get().then((doc) => {
+        currentLose = parseInt(doc.get("#Lose"));
+      }).then(() => {
         this._ref.doc(rhit.authManager.uid).update({
-          [rhit.FB_KEY_NUMLOSE]:currentLose+1,
-          [rhit.FB_KEY_NUMTOTALGAME]:totalGames+1
+          [rhit.FB_KEY_NUMLOSE]: currentLose + 1,
+          [rhit.FB_KEY_NUMTOTALGAME]: totalGames + 1
         })
       });
-      
+
     }
   }
 }
@@ -529,6 +541,7 @@ rhit.LobbyController = class {
       newGame.rounds = rhit.fbSingleLobbyManager.numRounds;
       newGame.currentRound = 1;
       newGame.timeForRound = rhit.fbSingleLobbyManager.timeforRound;
+      newGame.lobby = rhit.fbSingleLobbyManager.lobbyId;
       rhit.fbSingleLobbyManager.addGame(newGame).then((game) => {
 
         console.log("Starting game:", game)
@@ -570,8 +583,6 @@ rhit.LobbyController = class {
       }
       window.location.href = `/gameMain.html?gameId=${rhit.fbSingleLobbyManager.game}`
     }
-
-
 
 
   }
@@ -653,7 +664,8 @@ rhit.FbSingleLobbyManager = class {
       Letter: String.fromCharCode(65 + Math.floor(Math.random() * 26)),
       Rounds: game.rounds,
       CurrentRound: game.currentRound,
-      TimeforRound: game.timeForRound
+      TimeforRound: game.timeForRound,
+      Lobby: game.lobby
     }).then((docRef) => {
       console.log("Document written with ID: ", docRef.id);
       game.scores = assignScores;
@@ -754,24 +766,46 @@ rhit.VoteController = class {
       const oldAnswers = document.getElementById("votingStuff");
       const newAnswers = htmlToElement('<div id="votingStuff"></div>');
 
+      const playerIds = [];
       inputsForThisCategory.forEach((input) => {
+        playerIds.push(input.player);
+      });
+
+      let myPromise = new Promise((resolve, reject) => {
+
+
+        // while (numProcessed < playerCount) {
+        //   //wait
+        // }
+        // resolve();
+      });
+
+      const playerCount = inputsForThisCategory.length;
+      const numProcessed = 0;
+      inputsForThisCategory.forEach((input, index) => {
+        // rhit.fbUsersManager.getUserInfo(input.player).then((userInfo) => {
         const inputHtml = htmlToElement(`
-        <form id="playerAnswers">
-        <div class="voteRow">
-          <h2>${input.answer}</h2>
-          <div id=${input.player}-buttons data-val="-1" class="voteButtons">
-              <button id="${input.player}-yes" class="voteButton" type="button">Yes!</button>
-              <button id="${input.player}-no" class="voteButton" type="button">No!</button>
-          </div>
-        </div>
-        </form>
-        `);
+            <form id="playerAnswers">
+            <div class="voteRow">
+              <h2>${input.answer}</h2>
+              <div id=${input.player}-buttons data-val="0" class="voteButtons">
+                  <button id="${input.player}-yes" class="voteButton" type="button">Yes!</button>
+                  <button id="${input.player}-no" class="voteButton" type="button">No!</button>
+              </div>
+            </div>
+            </form>
+            `);
 
         //Give the div a value that we change on click. Then when the submit button is hit, we need to get all the vals from the divs and submit them.
 
         newAnswers.appendChild(inputHtml);
-      });
+        if (index > input.length - 1) {
+          resolve();
+        }
+        // })
+      })
 
+      // myPromise.then(() => {
       oldAnswers.hidden = true;
       oldAnswers.removeAttribute("id");
       oldAnswers.parentElement.appendChild(newAnswers);
@@ -787,7 +821,10 @@ rhit.VoteController = class {
           document.getElementById(input.player + "-buttons").dataset.val = 0;
         }
       });
-    });
+      // })
+
+
+    })
   }
   voteButton(player, vote) {
     this.votes[player] = vote;
@@ -869,6 +906,7 @@ rhit.FbPlayerInputsManager = class {
       game.currentRound = doc.get("CurrentRound");
       game.rounds = doc.get("Rounds");
       game.timeForRound = doc.get("TimeforRound");
+      game.lobby = doc.get("Lobby");
       return game;
     })
   }
@@ -909,6 +947,7 @@ rhit.GameModel = class {
     this.rounds = 0;
     this.currentRound = 0;
     this.timeForRound = 0;
+    this.lobby = "";
   }
 }
 
@@ -1158,7 +1197,7 @@ rhit.FBResultsManager = class {
         });
 
       });
-      
+
     });
 
   }
@@ -1169,16 +1208,38 @@ rhit.FBResultsManager = class {
   get scores() {
     return this._documentSnapshot.get("Scores");
   }
+
+  getLobby() {
+    return firebase.firestore().collection("Lobbies").where("Game", "==", this.gameId).get().then((snap) => {
+      let ret = [];
+      snap.forEach((doc) => {
+        console.log("doc", doc.id)
+        ret.push(doc.id);
+      })
+
+      return ret[0];
+    })
+  }
+
 }
 rhit.ResultsController = class {
-
   constructor() {
-
     rhit.fbResultsManager.beginListening(this.updateView.bind(this));
+    rhit.fbResultsManager.getLobby().then((lobby) => {
+      rhit.fbSingleLobbyManager = new rhit.FbSingleLobbyManager(lobby);
+      document.getElementById("exitLobbyButton").onclick = (event) => {
+        console.log("Lobby", rhit.fbResultsManager.lobby);
+        rhit.fbSingleLobbyManager.removeCurrentPlayer()
+        window.location.href = "/lobbyselect.html";
+
+      }
+    })
+
+
+
   }
 
   updateView() {
-
     rhit.fbResultsManager.getResults();
   }
 }
@@ -1214,11 +1275,11 @@ rhit.FbListsManager = class {
     });
 
   }
-  editMyList(){
+  editMyList() {
 
   }
-  publicMyList(myListId){
-    
+  publicMyList(myListId) {
+
   }
 
   get customLists() {
@@ -1270,15 +1331,15 @@ rhit.FbPublicListsManager = class {
     });
 
   }
- 
+
 
 }
-rhit.ListController = class{
-  constructor(){
+rhit.ListController = class {
+  constructor() {
 
   }
 
-  
+
 }
 
 
@@ -1325,6 +1386,7 @@ rhit.initializePage = function () {
     const urlParams = new URLSearchParams(window.location.search)
     rhit.fbResultsManager = new rhit.FBResultsManager(urlParams.get("gameId"));
     new rhit.ResultsController();
+
   }
 
   if (document.getElementById("votePage")) {
@@ -1333,11 +1395,11 @@ rhit.initializePage = function () {
     rhit.fbListsManager = new rhit.FbListsManager;
     new rhit.VoteController(urlParams.get("list"), urlParams.get("index"));
   }
-  if(document.getElementById("myListPage")){
+  if (document.getElementById("myListPage")) {
     rhit.fbListsManager = new rhit.FbListsManager;
     new rhit.ListController();
     rhit.drawerMenuInit();
-  }if (document.getElementById("publicListPage")){
+  } if (document.getElementById("publicListPage")) {
     rhit.fbPublicListsManager = new rhit.FbPublicListsManager;
     new rhit.ListController();
     rhit.drawerMenuInit();
@@ -1399,10 +1461,10 @@ rhit.drawerMenuInit = function () {
   document.getElementById("menuSignOut").onclick = (event) => {
     rhit.authManager.signOut();
   }
-  document.getElementById("menuMyLists").onclick =(event) => {
+  document.getElementById("menuMyLists").onclick = (event) => {
     window.location.href = `/mylist.html`
   }
-  document.getElementById("menuPublicLists").onclick =(event) => {
+  document.getElementById("menuPublicLists").onclick = (event) => {
     window.location.href = `/publicList.html`
   }
 }
