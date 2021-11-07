@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
+    <link rel="stylesheet" href="styles/bootstrap-material-design.min.css">
+    <link rel="stylesheet" href="styles/main.css">
+    <title>Scattergories</title>
+</head>
+
+<body>
+    <div class="bmd-layout-container bmd-drawer-f-l bmd-drawer-overlay">
+        <header class="bmd-layout-header">
+            <div class="navbar navbar-dark bg-faded justify-content-start">
+                <button class="navbar-toggler" type="button" data-toggle="drawer" data-target="#dw-s1">
+                    <span class="sr-only">Toggle drawer</span>
+                    <i class="material-icons">menu</i>
+                </button>
+                <a class="navbar-brand" href="./lobby.html">&nbsp;&nbsp;My Lists</a>
+            </div>
+        </header>
+        <div id="dw-s1" class="bmd-layout-drawer bg-faded">
+            <header>
+                <a class="navbar-brand">Scattergories</a>
+            </header>
+            <ul class="list-group">
+
+                <a class="list-group-item" id="menuMyLists"><i class="material-icons">list_alt</i>My Lists</a>
+                <a class="list-group-item" id="menuPublicLists"><i class="material-icons">receipt_long</i>Public
+                    Lists</a>
+                <a class="list-group-item" id="menuSignOut"><i class="material-icons">login</i>Sign Out</a>
+            </ul>
+        </div>
+        <main class="bmd-layout-content">
+            <div id="myListPage" class="container page-container">
+               
+
+                <div id="listColumns">
+                    <div class="card" style="width: 18rem;">
+                        <div class="card-body">
+                            <div>
+                                <h5 class="card-title">My Funny List</h5>
+                                <button>EDIT</button>
+                                <button>X</button>
+                            </div>
+    
+                            <div style="height: 3px; background-color:#673AB7"></div>
+                            <ol>
+                                <li>Things I like </li>
+                                <li>Things I hate</li>
+                            </ol>
+    
+                        </div>
+                    </div>
+                </div>
+             
+            </div>
+        </main>
+    </div>
+
+
+
+    <script src="scripts/jquery.min.js"></script>
+    <script src="scripts/popper.js"></script>
+    <script src="scripts/bootstrap-material-design.js"></script>
+    <script>
+        $("body").bootstrapMaterialDesign();
+    </script>
+    <script src="/__/firebase/7.18.0/firebase-app.js"></script>
+    <script src="/__/firebase/7.18.0/firebase-analytics.js"></script>
+    <script src="/__/firebase/7.18.0/firebase-auth.js"></script>
+    <script src="/__/firebase/7.18.0/firebase-firestore.js"></script>
+    <script src="/__/firebase/init.js"></script>
+    <script src="scripts/main.js"></script>
+</body>
+
+</html>
