@@ -627,6 +627,12 @@ rhit.FbSingleLobbyManager = class {
     this._ref.delete();
   }
 
+  deleteGame() {
+    this._ref.update({
+      Game: firebase.firestore.FieldValue.delete()
+    });
+  }
+
   removeCurrentPlayer() {
     this._ref.update({
       Players: firebase.firestore.FieldValue.arrayRemove(rhit.authManager.uid)
@@ -1230,8 +1236,13 @@ rhit.ResultsController = class {
         console.log("Lobby", rhit.fbResultsManager.lobby);
         rhit.fbSingleLobbyManager.removeCurrentPlayer()
         window.location.href = "/lobbyselect.html";
-
       }
+
+      document.getElementById("playAgainButton").onclick = () => {
+        rhit.fbSingleLobbyManager.deleteGame();
+        window.location.href = `/lobby.html?lobby=${lobby}`
+      }
+
     })
 
 
