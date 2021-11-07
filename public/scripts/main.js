@@ -1306,9 +1306,11 @@ rhit.initializePage = function () {
   if(document.getElementById("myListPage")){
     rhit.fbListsManager = new rhit.FbListsManager;
     new rhit.ListController();
+    rhit.drawerMenuInit();
   }if (document.getElementById("publicListPage")){
     rhit.fbPublicListsManager = new rhit.FbPublicListsManager;
     new rhit.ListController();
+    rhit.drawerMenuInit();
   }
 
 
@@ -1366,6 +1368,12 @@ rhit.lobbyInit = function () {
 rhit.drawerMenuInit = function () {
   document.getElementById("menuSignOut").onclick = (event) => {
     rhit.authManager.signOut();
+  }
+  document.getElementById("menuMyLists").onclick =(event) => {
+    window.location.href = `/mylist.html`
+  }
+  document.getElementById("menuPublicLists").onclick =(event) => {
+    window.location.href = `/publicList.html`
   }
 }
 
