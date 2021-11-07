@@ -37,7 +37,7 @@ rhit.authManager = null;
 rhit.fbSingleLobbyManager = null;
 rhit.fbUsersManager = null;
 rhit.fbListsManager = null;
-rhit.fbPublicListsManager=null;
+rhit.fbPublicListsManager = null;
 rhit.fbGamesManager = null;
 rhit.fbSingleGameManager = null;
 rhit.fbPlayerInputsManager = null;
@@ -238,31 +238,31 @@ rhit.FbUsersManager = class {
     });
 
   }
-  updateUserGameStats(isWin){
+  updateUserGameStats(isWin) {
     let totalGames = 0;
-    if(isWin){
-      let currentWin =0;
-      this._ref.doc(rhit.authManager.uid).get().then((doc)=>{
-        currentWin = parseInt(doc.get("#Win")) ;
-        totalGames =parseInt(doc.get("#TotalGame"));
-      }).then(()=>{
+    if (isWin) {
+      let currentWin = 0;
+      this._ref.doc(rhit.authManager.uid).get().then((doc) => {
+        currentWin = parseInt(doc.get("#Win"));
+        totalGames = parseInt(doc.get("#TotalGame"));
+      }).then(() => {
         this._ref.doc(rhit.authManager.uid).update({
-          [rhit.FB_KEY_NUMWIN]:currentWin+1,
-          [rhit.FB_KEY_NUMTOTALGAME]:totalGames+1
+          [rhit.FB_KEY_NUMWIN]: currentWin + 1,
+          [rhit.FB_KEY_NUMTOTALGAME]: totalGames + 1
         })
       });
-      
-    }else{
-      let currentLose =0;
-      this._ref.doc(rhit.authManager.uid).get().then((doc)=>{
-        currentLose = parseInt(doc.get("#Lose")) ;
-      }).then(()=>{
+
+    } else {
+      let currentLose = 0;
+      this._ref.doc(rhit.authManager.uid).get().then((doc) => {
+        currentLose = parseInt(doc.get("#Lose"));
+      }).then(() => {
         this._ref.doc(rhit.authManager.uid).update({
-          [rhit.FB_KEY_NUMLOSE]:currentLose+1,
-          [rhit.FB_KEY_NUMTOTALGAME]:totalGames+1
+          [rhit.FB_KEY_NUMLOSE]: currentLose + 1,
+          [rhit.FB_KEY_NUMTOTALGAME]: totalGames + 1
         })
       });
-      
+
     }
   }
 }
@@ -1157,7 +1157,7 @@ rhit.FBResultsManager = class {
         });
 
       });
-      
+
     });
 
   }
@@ -1213,11 +1213,11 @@ rhit.FbListsManager = class {
     });
 
   }
-  editMyList(){
+  editMyList() {
 
   }
-  publicMyList(myListId){
-    
+  publicMyList(myListId) {
+
   }
 
   get customLists() {
@@ -1250,10 +1250,11 @@ rhit.FbListsManager = class {
 
 }
 rhit.FbPublicListsManager = class {
-  constructor() {
+  constructor(listId) {
     this._documentSnapshots = [];
-    this._ref = firebase.firestore().collection("Lists");
+    this._ref = firebase.firestore().collection("Lists").where("public", "==", true);
     this._unsub = null;
+    this._listId = listId;
   }
 
   beginListening(changeListener) {
@@ -1263,21 +1264,74 @@ rhit.FbPublicListsManager = class {
     });
   }
 
-  getListById(id) {
-    return this._ref.doc(id).get().then((list) => {
-      return new rhit.ListModel(list.id, list.get("Name"), list.get("Owner"), list.get("Categories"), list.get("public"));
-    });
+  // getListById(id) {
+  //   return this._ref.doc(id).get().then((list) => {
+  //     return new rhit.ListModel(list.id, list.get("Name"), list.get("Owner"), list.get("Categories"), list.get("public"));
+  //   });
 
+  // }
+
+  get currentList() {
+    return this._listId;
   }
- 
+
+  get getAllPublicLists() {
+    let lists = [];
+    this._documentSnapshots.forEach((snap) => {
+      lists.push(new rhit.ListModel(snap.id, snap.get("Name"), snap.get("Owner"), snap.get("Categories")));
+    });
+    return lists;
+  }
 
 }
-rhit.ListController = class{
-  constructor(){
+rhit.MyListController = class {
+  constructor() {
 
   }
 
-  
+
+
+}
+
+rhit.PublicListController = class {
+  constructor() {
+    rhit.fbPublicListsManager.beginListening(this.updateView.bind(this));
+    console.log(rhit.fbPublicListsManager._listId)
+  }
+  updateView() {
+    // for displaying all public list 
+    if (!rhit.fbPublicListsManager.currentList) {
+      console.log(rhit.fbPublicListsManager.getAllPublicLists);
+      const publicListDiv = document.querySelector("#listColumns");
+      rhit.fbPublicListsManager.getAllPublicLists.forEach((list) => {
+        let categories = htmlToElement(`<ol></ol>`);
+        list.categories.forEach((category)=>{
+          let cate = htmlToElement(`<li>${category} </li>`)
+          categories.appendChild(cate);
+        }
+        );
+        rhit.fbUsersManager.getUserInfo(list.owner).then((playerModel) => {
+          let listcard = htmlToElement(`<div class="card" style="width: 18rem;">
+          <div class="card-body">
+              <div>
+                  <h5 class="card-title"${list.name}</h5>
+                  <p>${playerModel.username} </p>
+                  <button>Save</button>
+                 
+              </div>
+            
+            <div style="height: 3px; background-color:#673AB7"></div>
+         
+          </div>
+        </div>`);
+        listcard.childNodes[1].appendChild(categories);
+        publicListDiv.appendChild(listcard)
+        })
+      })
+    }
+  }
+
+
 }
 
 
@@ -1332,13 +1386,15 @@ rhit.initializePage = function () {
     rhit.fbListsManager = new rhit.FbListsManager;
     new rhit.VoteController(urlParams.get("list"), urlParams.get("index"));
   }
-  if(document.getElementById("myListPage")){
-    rhit.fbListsManager = new rhit.FbListsManager;
-    new rhit.ListController();
+  if (document.getElementById("myListPage")) {
+    const urlParams = new URLSearchParams(window.location.search);
+    rhit.fbListsManager = new rhit.FbListsManager(urlParams.get("listId"));
+    new rhit.MyListController();
     rhit.drawerMenuInit();
-  }if (document.getElementById("publicListPage")){
-    rhit.fbPublicListsManager = new rhit.FbPublicListsManager;
-    new rhit.ListController();
+  } if (document.getElementById("publicListPage")) {
+    const urlParams = new URLSearchParams(window.location.search);
+    rhit.fbPublicListsManager = new rhit.FbPublicListsManager(urlParams.get("listId"));
+    new rhit.PublicListController();
     rhit.drawerMenuInit();
   }
 
@@ -1398,10 +1454,10 @@ rhit.drawerMenuInit = function () {
   document.getElementById("menuSignOut").onclick = (event) => {
     rhit.authManager.signOut();
   }
-  document.getElementById("menuMyLists").onclick =(event) => {
+  document.getElementById("menuMyLists").onclick = (event) => {
     window.location.href = `/mylist.html`
   }
-  document.getElementById("menuPublicLists").onclick =(event) => {
+  document.getElementById("menuPublicLists").onclick = (event) => {
     window.location.href = `/publicList.html`
   }
 }
