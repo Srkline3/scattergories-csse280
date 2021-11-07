@@ -1194,10 +1194,11 @@ rhit.ListModel = class {
 
 
 rhit.FbListsManager = class {
-  constructor() {
+  constructor(listId) {
     this._documentSnapshots = [];
     this._ref = firebase.firestore().collection("Lists");
     this._unsub = null;
+    this._listId = listId;
   }
 
   beginListening(changeListener) {
@@ -1216,6 +1217,7 @@ rhit.FbListsManager = class {
   editMyList() {
 
   }
+
   publicMyList(myListId) {
 
   }
@@ -1247,8 +1249,12 @@ rhit.FbListsManager = class {
 
     return lists;
   }
-
+  get currentList() {
+    return this._listId;
+  }
 }
+
+
 rhit.FbPublicListsManager = class {
   constructor(listId) {
     this._documentSnapshots = [];
@@ -1264,13 +1270,6 @@ rhit.FbPublicListsManager = class {
     });
   }
 
-  // getListById(id) {
-  //   return this._ref.doc(id).get().then((list) => {
-  //     return new rhit.ListModel(list.id, list.get("Name"), list.get("Owner"), list.get("Categories"), list.get("public"));
-  //   });
-
-  // }
-
   get currentList() {
     return this._listId;
   }
@@ -1284,9 +1283,42 @@ rhit.FbPublicListsManager = class {
   }
 
 }
+
+
 rhit.MyListController = class {
   constructor() {
-
+    rhit.fbListsManager.beginListening(this.updateView.bind(this));
+  }
+  updateView() {
+    // for displaying all public list 
+    if (!rhit.fbListsManager.currentList) {
+      console.log(rhit.fbListsManager.customLists);
+      const publicListDiv = document.querySelector("#listColumns");
+      rhit.fbListsManager.customLists.forEach((list) => {
+        let categories = htmlToElement(`<ol></ol>`);
+        list.categories.forEach((category) => {
+          let cate = htmlToElement(`<li>${category} </li>`)
+          categories.appendChild(cate);
+        }
+        );
+        
+          let listcard = htmlToElement(`
+          <div class="card" style="width: 18rem;">
+                        <div class="card-body">
+                            <div>
+                                <h5 class="card-title">${list.name}</h5>
+                                <button>EDIT</button>
+                                <button>X</button>
+                            </div>
+    
+                            <div style="height: 3px; background-color:#673AB7"></div>
+                        </div>
+                    </div>`);
+          listcard.childNodes[1].appendChild(categories);
+          publicListDiv.appendChild(listcard)
+       
+      })
+    }
   }
 
 
@@ -1305,7 +1337,7 @@ rhit.PublicListController = class {
       const publicListDiv = document.querySelector("#listColumns");
       rhit.fbPublicListsManager.getAllPublicLists.forEach((list) => {
         let categories = htmlToElement(`<ol></ol>`);
-        list.categories.forEach((category)=>{
+        list.categories.forEach((category) => {
           let cate = htmlToElement(`<li>${category} </li>`)
           categories.appendChild(cate);
         }
@@ -1324,8 +1356,8 @@ rhit.PublicListController = class {
          
           </div>
         </div>`);
-        listcard.childNodes[1].appendChild(categories);
-        publicListDiv.appendChild(listcard)
+          listcard.childNodes[1].appendChild(categories);
+          publicListDiv.appendChild(listcard)
         })
       })
     }
