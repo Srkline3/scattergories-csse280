@@ -695,12 +695,20 @@ rhit.VoteController = class {
 
     //submit click listener 
     document.getElementById("submitVoteBtn").onclick = (event) => {
-      rhit.fbPlayerInputsManager.getScore().then((score) => {
-        const voters = Object.keys(this.votes);
+      rhit.fbPlayerInputsManager.getGame().then((game) => {
+        const voters = game.players;
         for (let voter of voters) {
-          console.log("Score", score[voter]);
-          console.log("Votes", this.votes[voter])
-          this.votes[voter] = this.votes[voter] + score[voter];
+          console.log("Score", game.scores[voter]);
+          console.log("Votes", this.votes[voter]);
+          if (isNaN(this.votes[voter])) {
+            //return;
+            this.votes[voter] = game.scores[voter];
+            console.log("No vote", game.scores);
+          } else {
+            console.log("Vote")
+            this.votes[voter] = this.votes[voter] + game.scores[voter];
+          }
+
         }
         console.log(this.votes);
 
@@ -766,26 +774,39 @@ rhit.VoteController = class {
       const playerCount = inputsForThisCategory.length;
       const numProcessed = 0;
       inputsForThisCategory.forEach((input, index) => {
-    
 
-        
-        const inputHtml = htmlToElement(`
-            <form id="playerAnswers">
-            <p id=${input.player}></p>
-            <div class="voteRow">
-              <h2>${input.answer}</h2>
-              <div id=${input.player}-buttons data-val="0" class="voteButtons">
-                  <button id="${input.player}-yes" class="voteButton" type="button">Yes!</button>
-                  <button id="${input.player}-no" class="voteButton" type="button">No!</button>
-              </div>
+        if (input.answer.length > 0) {
+          const inputHtml = htmlToElement(`
+          <form id="playerAnswers">
+          <p id=${input.player}></p>
+          <div class="voteRow">
+            <h2>${input.answer}</h2>
+            <div id=${input.player}-buttons data-val="0" class="voteButtons">
+                <button id="${input.player}-yes" class="voteButton" type="button">Yes!</button>
+                <button id="${input.player}-no" class="voteButton" type="button">No!</button>
             </div>
-            </form>
-            `);
+          </div>
+          </form>
+          `);
+          newAnswers.appendChild(inputHtml);
+        } else {
+          const inputHtml = htmlToElement(`
+          <form id="playerAnswers">
+          <p id=${input.player}></p>
+          <div class="voteRow">
+            <h2>No Answer</h2>
+          </div>
+          </form>
+          `);
+          newAnswers.appendChild(inputHtml);
+        }
+
+
 
         //Give the div a value that we change on click. Then when the submit button is hit, we need to get all the vals from the divs and submit them.
-     
-        newAnswers.appendChild(inputHtml);
-       
+
+        
+
       })
 
       oldAnswers.hidden = true;
@@ -793,23 +814,26 @@ rhit.VoteController = class {
       oldAnswers.parentElement.appendChild(newAnswers);
 
       inputsForThisCategory.forEach((input) => {
-        document.getElementById(input.player + "-yes").onclick = (event) => {
-          this.voteButton(input.player, 1);
-          document.getElementById(input.player + "-buttons").dataset.val = 1;
+        if (input.answer.length > 0) {
+          document.getElementById(input.player + "-yes").onclick = (event) => {
+            this.voteButton(input.player, 1);
+            document.getElementById(input.player + "-buttons").dataset.val = 1;
+          }
+
+          document.getElementById(input.player + "-no").onclick = (event) => {
+            this.voteButton(input.player, 0);
+            document.getElementById(input.player + "-buttons").dataset.val = 0;
+          }
         }
 
-        document.getElementById(input.player + "-no").onclick = (event) => {
-          this.voteButton(input.player, 0);
-          document.getElementById(input.player + "-buttons").dataset.val = 0;
-        }
       });
 
 
       inputsForThisCategory.forEach((input) => {
-        rhit.fbUsersManager.getUserInfo(input.player).then((userInfo)=>{
+        rhit.fbUsersManager.getUserInfo(input.player).then((userInfo) => {
           document.getElementById(`${input.player}`).innerHTML = userInfo.username;
         })
-        
+
       })
 
     })
@@ -1151,42 +1175,33 @@ rhit.FBResultsManager = class {
   getResults() {
     let results = {};
     results = this.scores;
-    console.log(results);
-    this.playerInputs.get().then((doc) => {
-      doc.forEach((d) => {
-        if (typeof d.get("Votes") !== 'undefined') {
-          results[d.get("Player")] += parseInt(d.get("Votes"));
-        }
-      })
-
-    }).then(() => {
-      console.log(results);
-      const htmlForResults = document.querySelector("#playersResult");
-      var maxScore = Math.max(...Object.values(results));
-      var winner = Object.keys(results).filter(function (x) { return results[x] == maxScore; });
-      console.log(winner);
-      var resultTitle = document.querySelector("#resultTitle");
-      if (winner.includes(rhit.authManager.uid)) {
-        resultTitle.innerHTML = "You Won!";
-        rhit.fbUsersManager.updateUserGameStats(true);
-      } else {
-        resultTitle.innerHTML = "You Lose!";
-        rhit.fbUsersManager.updateUserGameStats(false);
-      }
-      Object.keys(results).forEach(player => {
-        rhit.fbUsersManager.getUserInfo(player).then((playerModel) => {
-          let result = htmlToElement(
-            `<div class="row">
+    console.log("here should be scores map", results);
+    const htmlForResults = document.querySelector("#playersResult");
+    var maxScore = Math.max(...Object.values(results));
+    var winner = Object.keys(results).filter(function (x) { return results[x] == maxScore; });
+    console.log(winner);
+    var resultTitle = document.querySelector("#resultTitle");
+    if (winner.includes(rhit.authManager.uid)) {
+      resultTitle.innerHTML = "You Won!";
+      rhit.fbUsersManager.updateUserGameStats(true);
+    } else {
+      resultTitle.innerHTML = "You Lose!";
+      rhit.fbUsersManager.updateUserGameStats(false);
+    }
+    Object.keys(results).forEach(player => {
+      rhit.fbUsersManager.getUserInfo(player).then((playerModel) => {
+        let result = htmlToElement(
+          `<div class="row">
             <div class="column">${playerModel.username}</div>
                           <div class="column">${results[player]}</div>
                         </div>`);
 
-          htmlForResults.appendChild(result);
-        });
-
+        htmlForResults.appendChild(result);
       });
 
     });
+
+
 
   }
 
@@ -1355,8 +1370,8 @@ rhit.MyListController = class {
           categories.appendChild(cate);
         }
         );
-        
-          let listcard = htmlToElement(`
+
+        let listcard = htmlToElement(`
           <div class="card" style="width: 18rem;">
                         <div class="card-body">
                             <div>
@@ -1368,9 +1383,9 @@ rhit.MyListController = class {
                             <div style="height: 3px; background-color:#673AB7"></div>
                         </div>
                     </div>`);
-          listcard.childNodes[1].appendChild(categories);
-          publicListDiv.appendChild(listcard)
-       
+        listcard.childNodes[1].appendChild(categories);
+        publicListDiv.appendChild(listcard)
+
       })
     }
   }
