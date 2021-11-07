@@ -776,21 +776,15 @@ rhit.VoteController = class {
         playerIds.push(input.player);
       });
 
-      let myPromise = new Promise((resolve, reject) => {
-
-
-        // while (numProcessed < playerCount) {
-        //   //wait
-        // }
-        // resolve();
-      });
-
       const playerCount = inputsForThisCategory.length;
       const numProcessed = 0;
       inputsForThisCategory.forEach((input, index) => {
-        // rhit.fbUsersManager.getUserInfo(input.player).then((userInfo) => {
+    
+
+        
         const inputHtml = htmlToElement(`
             <form id="playerAnswers">
+            <p id=${input.player}></p>
             <div class="voteRow">
               <h2>${input.answer}</h2>
               <div id=${input.player}-buttons data-val="0" class="voteButtons">
@@ -802,15 +796,11 @@ rhit.VoteController = class {
             `);
 
         //Give the div a value that we change on click. Then when the submit button is hit, we need to get all the vals from the divs and submit them.
-
+     
         newAnswers.appendChild(inputHtml);
-        if (index > input.length - 1) {
-          resolve();
-        }
-        // })
+       
       })
 
-      // myPromise.then(() => {
       oldAnswers.hidden = true;
       oldAnswers.removeAttribute("id");
       oldAnswers.parentElement.appendChild(newAnswers);
@@ -826,8 +816,14 @@ rhit.VoteController = class {
           document.getElementById(input.player + "-buttons").dataset.val = 0;
         }
       });
-      // })
 
+
+      inputsForThisCategory.forEach((input) => {
+        rhit.fbUsersManager.getUserInfo(input.player).then((userInfo)=>{
+          document.getElementById(`${input.player}`).innerHTML = userInfo.username;
+        })
+        
+      })
 
     })
   }
