@@ -237,19 +237,6 @@ rhit.FbUsersManager = class {
       return new rhit.UserModel(snapshot.id, snapshot.get("Username"));
     });
   }
-
-  // getUsersInfo(users) {
-  //   //I think this will fail if you try it with more than 10 users
-  //   console.log("Users", users);
-  //   return this._ref.where("uid", "in", users).get().then((qs) => {
-  //     let info = [];
-  //     qs.forEach((doc) => {
-  //       info.push(new rhit.UserModel(doc.id, doc.get("Username")))
-  //     });
-  //     return info;
-  //   });
-  // }
-
   updateUserGameStats(isWin) {
     let totalGames = 0;
     if (isWin) {
@@ -1262,10 +1249,11 @@ rhit.ListModel = class {
 
 
 rhit.FbListsManager = class {
-  constructor() {
+  constructor(listId) {
     this._documentSnapshots = [];
     this._ref = firebase.firestore().collection("Lists");
     this._unsub = null;
+    this._listId = listId;
   }
 
   beginListening(changeListener) {
@@ -1315,13 +1303,18 @@ rhit.FbListsManager = class {
 
     return lists;
   }
-
+  get currentList() {
+    return this._listId;
+  }
 }
+
+
 rhit.FbPublicListsManager = class {
-  constructor() {
+  constructor(listId) {
     this._documentSnapshots = [];
-    this._ref = firebase.firestore().collection("Lists");
+    this._ref = firebase.firestore().collection("Lists").where("public", "==", true);
     this._unsub = null;
+    this._listId = listId;
   }
 
   beginListening(changeListener) {
@@ -1331,18 +1324,97 @@ rhit.FbPublicListsManager = class {
     });
   }
 
-  getListById(id) {
-    return this._ref.doc(id).get().then((list) => {
-      return new rhit.ListModel(list.id, list.get("Name"), list.get("Owner"), list.get("Categories"), list.get("public"));
-    });
+  get currentList() {
+    return this._listId;
+  }
 
+  get getAllPublicLists() {
+    let lists = [];
+    this._documentSnapshots.forEach((snap) => {
+      lists.push(new rhit.ListModel(snap.id, snap.get("Name"), snap.get("Owner"), snap.get("Categories")));
+    });
+    return lists;
+  }
+
+}
+
+
+rhit.MyListController = class {
+  constructor() {
+    rhit.fbListsManager.beginListening(this.updateView.bind(this));
+  }
+  updateView() {
+    // for displaying all public list 
+    if (!rhit.fbListsManager.currentList) {
+      console.log(rhit.fbListsManager.customLists);
+      const publicListDiv = document.querySelector("#listColumns");
+      rhit.fbListsManager.customLists.forEach((list) => {
+        let categories = htmlToElement(`<ol></ol>`);
+        list.categories.forEach((category) => {
+          let cate = htmlToElement(`<li>${category} </li>`)
+          categories.appendChild(cate);
+        }
+        );
+        
+          let listcard = htmlToElement(`
+          <div class="card" style="width: 18rem;">
+                        <div class="card-body">
+                            <div>
+                                <h5 class="card-title">${list.name}</h5>
+                                <button>EDIT</button>
+                                <button>X</button>
+                            </div>
+    
+                            <div style="height: 3px; background-color:#673AB7"></div>
+                        </div>
+                    </div>`);
+          listcard.childNodes[1].appendChild(categories);
+          publicListDiv.appendChild(listcard)
+       
+      })
+    }
   }
 
 
-}
-rhit.ListController = class {
-  constructor() {
 
+}
+
+rhit.PublicListController = class {
+  constructor() {
+    rhit.fbPublicListsManager.beginListening(this.updateView.bind(this));
+    console.log(rhit.fbPublicListsManager._listId)
+  }
+  updateView() {
+    // for displaying all public list 
+    if (!rhit.fbPublicListsManager.currentList) {
+      console.log(rhit.fbPublicListsManager.getAllPublicLists);
+      const publicListDiv = document.querySelector("#listColumns");
+      rhit.fbPublicListsManager.getAllPublicLists.forEach((list) => {
+        let categories = htmlToElement(`<ol></ol>`);
+        list.categories.forEach((category) => {
+          let cate = htmlToElement(`<li>${category} </li>`)
+          categories.appendChild(cate);
+        }
+        );
+        rhit.fbUsersManager.getUserInfo(list.owner).then((playerModel) => {
+          let listcard = htmlToElement(`<div class="card" style="width: 18rem;">
+          <div class="card-body">
+              <div>
+                  <h5 class="card-title"${list.name}</h5>
+                  <p>${playerModel.username} </p>
+                  <button>Save</button>
+                 
+              </div>
+            
+            <div style="height: 3px; background-color:#673AB7"></div>
+         
+          </div>
+        </div>`);
+          listcard.childNodes[1].appendChild(categories);
+          publicListDiv.appendChild(listcard)
+        })
+      })
+    }
   }
 
 
@@ -1402,12 +1474,14 @@ rhit.initializePage = function () {
     new rhit.VoteController(urlParams.get("list"), urlParams.get("index"));
   }
   if (document.getElementById("myListPage")) {
-    rhit.fbListsManager = new rhit.FbListsManager;
-    new rhit.ListController();
+    const urlParams = new URLSearchParams(window.location.search);
+    rhit.fbListsManager = new rhit.FbListsManager(urlParams.get("listId"));
+    new rhit.MyListController();
     rhit.drawerMenuInit();
   } if (document.getElementById("publicListPage")) {
-    rhit.fbPublicListsManager = new rhit.FbPublicListsManager;
-    new rhit.ListController();
+    const urlParams = new URLSearchParams(window.location.search);
+    rhit.fbPublicListsManager = new rhit.FbPublicListsManager(urlParams.get("listId"));
+    new rhit.PublicListController();
     rhit.drawerMenuInit();
   }
 
