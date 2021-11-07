@@ -1140,9 +1140,11 @@ rhit.FBResultsManager = class {
       console.log(winner);
       var resultTitle = document.querySelector("#resultTitle");
       if (winner.includes(rhit.authManager.uid)) {
-        resultTitle.innerHTML = "You Won!"
+        resultTitle.innerHTML = "You Won!";
+        rhit.fbUsersManager.updateUserGameStats(true);
       } else {
-        resultTitle.innerHTML = "You Lose!"
+        resultTitle.innerHTML = "You Lose!";
+        rhit.fbUsersManager.updateUserGameStats(false);
       }
       Object.keys(results).forEach(player => {
         rhit.fbUsersManager.getUserInfo(player).then((playerModel) => {
@@ -1156,6 +1158,7 @@ rhit.FBResultsManager = class {
         });
 
       });
+      
     });
 
   }
