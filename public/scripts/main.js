@@ -239,6 +239,33 @@ rhit.FbUsersManager = class {
     });
 
   }
+  updateUserGameStats(isWin){
+    let totalGames = 0;
+    if(isWin){
+      let currentWin =0;
+      this._ref.doc(rhit.authManager.uid).get().then((doc)=>{
+        currentWin = parseInt(doc.get("#Win")) ;
+        totalGames =parseInt(doc.get("#TotalGame"));
+      }).then(()=>{
+        this._ref.doc(rhit.authManager.uid).update({
+          [rhit.FB_KEY_NUMWIN]:currentWin+1,
+          [rhit.FB_KEY_NUMTOTALGAME]:totalGames+1
+        })
+      });
+      
+    }else{
+      let currentLose =0;
+      this._ref.doc(rhit.authManager.uid).get().then((doc)=>{
+        currentLose = parseInt(doc.get("#Lose")) ;
+      }).then(()=>{
+        this._ref.doc(rhit.authManager.uid).update({
+          [rhit.FB_KEY_NUMLOSE]:currentLose+1,
+          [rhit.FB_KEY_NUMTOTALGAME]:totalGames+1
+        })
+      });
+      
+    }
+  }
 }
 
 
