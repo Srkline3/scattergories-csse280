@@ -1368,6 +1368,10 @@ rhit.FbPublicListsManager = class {
     return lists;
   }
 
+  savePublicList(listId){
+      
+  }
+
 }
 
 
@@ -1414,11 +1418,17 @@ rhit.MyListController = class {
 rhit.PublicListController = class {
   constructor() {
     rhit.fbPublicListsManager.beginListening(this.updateView.bind(this));
+    $("#savePublicListModal").on('show.bs.modal', (event)=> {
+     var button = $(event.relatedTarget)
 
+      document.querySelector("#saveConfirmBtn").onclick = (event) => {
+        console.log(button.data('listid'))
+      }
+			
+		});
   }
   updateView() {
     // for displaying all public list 
-    if (!rhit.fbPublicListsManager.currentList) {
       console.log(rhit.fbPublicListsManager.getAllPublicLists);
       const publicListDiv = document.querySelector("#listColumns");
       rhit.fbPublicListsManager.getAllPublicLists.forEach((list) => {
@@ -1434,8 +1444,8 @@ rhit.PublicListController = class {
               <div>
                   <h5 class="card-title"${list.name}</h5>
                   <p>${playerModel.username} </p>
-                  <button type="button" id=${list.id}Save data-toggle="modal"
-                  data-target="#savePublicListModal">Save</button>
+                  <button type="button" data-toggle="modal" id="saveBtn"
+                  data-target="#savePublicListModal" data-listId=${list.id}>Save</button>
                 
               </div>
             
@@ -1447,7 +1457,7 @@ rhit.PublicListController = class {
           publicListDiv.appendChild(listcard)
         })
       })
-    }
+    
   }
 
 
