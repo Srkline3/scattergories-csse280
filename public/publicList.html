@@ -24,10 +24,12 @@
 		</header>
 		<div id="dw-s1" class="bmd-layout-drawer bg-faded">
 		  <header>
-			<a class="navbar-brand">Scattergories</a>
+			
+			<a class="navbar-brand" id="username"></a>
+			<img src="" alt="" id="avator">
 		  </header>
 		  <ul class="list-group">
-		
+			<a class="list-group-item" id="menuGameStat"><i class="material-icons">face</i>Game Stat</a>
 			<a class="list-group-item" id="menuMyLists"><i class="material-icons">list_alt</i>My Lists</a>
 			<a class="list-group-item" id="menuPublicLists"><i class="material-icons">receipt_long</i>Public Lists</a>
 			<a class="list-group-item" id="menuSignOut"><i class="material-icons">login</i>Sign Out</a>
@@ -35,12 +37,8 @@
 		</div>
 		<main class="bmd-layout-content">
 			<div id="publicListPage" class="container page-container">
-                <label for="sortList">Sort By:</label>
+                
 
-                <select name="sortList" id="sortList">
-                    <option value="mostSaved">Most Saved</option>
-                    <option value="author">Author</option>
-                </select>
                 <div id="listColumns">
                     <!-- <div class="card" style="width: 18rem;">
                         <div class="card-body">
@@ -65,6 +63,26 @@
 		</main>
 	  </div>
 
+	<!-- modal -->
+	<div class="modal" tabindex="-1" role="dialog" id="savePublicListModal">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Save Public List</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p>Do you wanna save this public list?</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-primary" id="saveConfirmBtn">Save</button>
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
 
 
 	<script src="scripts/jquery.min.js"></script>

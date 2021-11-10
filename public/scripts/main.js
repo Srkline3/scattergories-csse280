@@ -139,6 +139,7 @@ rhit.AuthManager = class {
     this._ref = firebase.firestore().collection("Users");
     this._username = null;
     this._avatar = null;
+    this._document = null;
   }
 
   beginListening(changeListener) {
@@ -149,8 +150,10 @@ rhit.AuthManager = class {
 
         docRef.get().then((doc) => {
           if (doc.exists) {
+            this._document = doc;
             changeListener();
             console.log("who is logg in now: ", this._user);
+          
           } else {
             // for add a user in the users collection after sign up
             this._ref.doc(user.uid)
@@ -215,7 +218,21 @@ rhit.AuthManager = class {
   get isSignedIn() {
     return !!this._user;
   }
-
+  get avatar(){
+    return this._document.get(rhit.FB_KEY_AVATAR);
+  }
+  get username(){
+    return this._document.get(rhit.FB_KEY_USERNAME);
+  }
+  get totalGames(){
+    return this._document.get(rhit.FB_KEY_NUMTOTALGAME);
+  }
+  get wins(){
+    return this._document.get(rhit.FB_KEY_NUMWIN);
+  }
+  get loses(){
+    return this._document.get(rhit.FB_KEY_NUMLOSE);
+  }
 }
 
 /** USERS CODE. */
@@ -1337,6 +1354,7 @@ rhit.FbPublicListsManager = class {
   constructor(listId) {
     this._documentSnapshots = [];
     this._ref = firebase.firestore().collection("Lists").where("public", "==", true);
+    this._listRef = firebase.firestore().collection("Lists");
     this._unsub = null;
     this._listId = listId;
   }
@@ -1358,6 +1376,22 @@ rhit.FbPublicListsManager = class {
       lists.push(new rhit.ListModel(snap.id, snap.get("Name"), snap.get("Owner"), snap.get("Categories")));
     });
     return lists;
+  }
+  
+  savePublicList(listId){
+   this._listRef.doc(listId).get().then((list) => {
+      var name =list.get("Name");
+      var categories= list.get("Categories");
+      
+      return this._listRef.add({
+        Name:name,
+        Owner:rhit.authManager.uid,
+        public:false,
+        Categories:categories
+      }).catch(err => console.error(err));
+    });
+  
+    // console.log(list)
   }
 
 }
@@ -1504,11 +1538,18 @@ rhit.MyListController = class {
 rhit.PublicListController = class {
   constructor() {
     rhit.fbPublicListsManager.beginListening(this.updateView.bind(this));
-    console.log(rhit.fbPublicListsManager._listId)
+    $("#savePublicListModal").on('show.bs.modal', (event)=> {
+     var button = $(event.relatedTarget)
+
+      document.querySelector("#saveConfirmBtn").onclick = (event) => {
+        rhit.fbPublicListsManager.savePublicList(button.data('listid'));
+        $("#savePublicListModal").modal("hide");
+      }
+			
+		});
   }
   updateView() {
     // for displaying all public list 
-    if (!rhit.fbPublicListsManager.currentList) {
       console.log(rhit.fbPublicListsManager.getAllPublicLists);
       const publicListDiv = document.querySelector("#listColumns");
       rhit.fbPublicListsManager.getAllPublicLists.forEach((list) => {
@@ -1524,8 +1565,9 @@ rhit.PublicListController = class {
               <div>
                   <h5 class="card-title"${list.name}</h5>
                   <p>${playerModel.username} </p>
-                  <button>Save</button>
-                 
+                  <button type="button" data-toggle="modal" id="saveBtn"
+                  data-target="#savePublicListModal" data-listId=${list.id}>Save</button>
+                
               </div>
             
             <div style="height: 3px; background-color:#673AB7"></div>
@@ -1536,7 +1578,7 @@ rhit.PublicListController = class {
           publicListDiv.appendChild(listcard)
         })
       })
-    }
+    
   }
 
 
@@ -1600,13 +1642,20 @@ rhit.initializePage = function () {
     rhit.fbListsManager = new rhit.FbListsManager(urlParams.get("listId"));
     new rhit.MyListController();
     rhit.drawerMenuInit();
-  } if (document.getElementById("publicListPage")) {
+  } 
+  if (document.getElementById("publicListPage")) {
     const urlParams = new URLSearchParams(window.location.search);
     rhit.fbPublicListsManager = new rhit.FbPublicListsManager(urlParams.get("listId"));
     new rhit.PublicListController();
     rhit.drawerMenuInit();
   }
-
+  if (document.getElementById("gameStatPage")) {
+    document.getElementById("usernameP").innerHTML = rhit.authManager.username;
+    document.getElementById("totalGame").innerHTML = rhit.authManager.totalGames;
+    document.getElementById("win").innerHTML = rhit.authManager.wins;
+    document.getElementById("lose").innerHTML = rhit.authManager.loses;
+    rhit.drawerMenuInit();
+  }
 
 
 }
@@ -1660,6 +1709,11 @@ rhit.lobbyInit = function () {
 }
 
 rhit.drawerMenuInit = function () {
+ 
+  document.getElementById("avator").src = rhit.authManager.avatar;
+  document.getElementById("username").innerHTML = rhit.authManager.username;
+  
+  
   document.getElementById("menuSignOut").onclick = (event) => {
     rhit.authManager.signOut();
   }
@@ -1668,6 +1722,9 @@ rhit.drawerMenuInit = function () {
   }
   document.getElementById("menuPublicLists").onclick = (event) => {
     window.location.href = `/publicList.html`
+  }
+  document.getElementById("menuGameStat").onclick = (event) => {
+    window.location.href = `/stat.html`
   }
 }
 
