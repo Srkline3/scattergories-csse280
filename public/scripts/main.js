@@ -1422,30 +1422,32 @@ rhit.MyListController = class {
       oldList.removeAttribute("id");
       oldList.parentElement.appendChild(publicListDiv);
 
-      rhit.fbListsManager.customLists.forEach((list) => {
-        console.log("wyd", list.id)
-        document.getElementById(`edit-${list.id}`).onclick = (event) => {
-          document.getElementById("modalTitle").innerHTML = "Edit List";
-          rhit.fbListsManager.getListById(list.id).then((list) =>{
-            document.getElementById("inputListName").value = list.name;
-            document.getElementById("inputPublic").checked = list.isPublic;
-            for (let i = 0; i < 12; i++) {
-              document.getElementById(`cat${i}Input`).value = list.categories[i];
-            }
-          }) 
-          document.getElementById("submitUpdateList").hidden = false;
-          document.getElementById("submitNewList").hidden = true;
-          document.getElementById("modalTitle").innerHTML = "Update List"
-          rhit.fbListsManager._listId = list.id;
-        }
-        document.getElementById(`delete-${list.id}`).onclick = (event) => {
-          console.log("Clicked deletes")
-          rhit.fbListsManager.deleteList(list.id);
-        }
+      // rhit.fbListsManager.customLists.forEach((list) => {
+      //   console.log("wyd", list.id)
+      //   document.getElementById(`edit-${list.id}`).onclick = (event) => {
+      //     document.getElementById("modalTitle").innerHTML = "Edit List";
+      //     rhit.fbListsManager.getListById(list.id).then((list) =>{
+      //       document.getElementById("inputListName").value = list.name;
+      //       document.getElementById("inputPublic").checked = list.isPublic;
+      //       for (let i = 0; i < 12; i++) {
+      //         document.getElementById(`cat${i}Input`).value = list.categories[i];
+      //       }
+      //     }) 
+      //     document.getElementById("submitUpdateList").hidden = false;
+      //     document.getElementById("submitNewList").hidden = true;
+      //     document.getElementById("modalTitle").innerHTML = "Update List"
+      //     rhit.fbListsManager._listId = list.id;
+      //   }
 
-        console.log("Set onclicks");
+      //   document.getElementById(`delete-${list.id}`).onclick = (event) => {
+      //     console.log("Clicked deletes")
+      //     rhit.fbListsManager.deleteList(list.id);
+      //   }
 
-      })
+      //   console.log("Set onclicks");
+      //   console.log(document.getElementById(`delete-${list.id}`))
+
+      // })
     // }
 
   }
