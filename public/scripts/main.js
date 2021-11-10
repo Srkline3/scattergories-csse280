@@ -139,6 +139,7 @@ rhit.AuthManager = class {
     this._ref = firebase.firestore().collection("Users");
     this._username = null;
     this._avatar = null;
+    this._document = null;
   }
 
   beginListening(changeListener) {
@@ -149,8 +150,10 @@ rhit.AuthManager = class {
 
         docRef.get().then((doc) => {
           if (doc.exists) {
+            this._document = doc;
             changeListener();
             console.log("who is logg in now: ", this._user);
+          
           } else {
             // for add a user in the users collection after sign up
             this._ref.doc(user.uid)
@@ -215,7 +218,21 @@ rhit.AuthManager = class {
   get isSignedIn() {
     return !!this._user;
   }
-
+  get avatar(){
+    return this._document.get(rhit.FB_KEY_AVATAR);
+  }
+  get username(){
+    return this._document.get(rhit.FB_KEY_USERNAME);
+  }
+  get totalGames(){
+    return this._document.get(rhit.FB_KEY_NUMTOTALGAME);
+  }
+  get wins(){
+    return this._document.get(rhit.FB_KEY_NUMWIN);
+  }
+  get loses(){
+    return this._document.get(rhit.FB_KEY_NUMLOSE);
+  }
 }
 
 /** USERS CODE. */
@@ -1493,13 +1510,20 @@ rhit.initializePage = function () {
     rhit.fbListsManager = new rhit.FbListsManager(urlParams.get("listId"));
     new rhit.MyListController();
     rhit.drawerMenuInit();
-  } if (document.getElementById("publicListPage")) {
+  } 
+  if (document.getElementById("publicListPage")) {
     const urlParams = new URLSearchParams(window.location.search);
     rhit.fbPublicListsManager = new rhit.FbPublicListsManager(urlParams.get("listId"));
     new rhit.PublicListController();
     rhit.drawerMenuInit();
   }
-
+  if (document.getElementById("gameStatPage")) {
+    document.getElementById("usernameP").innerHTML = rhit.authManager.username;
+    document.getElementById("totalGame").innerHTML = rhit.authManager.totalGames;
+    document.getElementById("win").innerHTML = rhit.authManager.wins;
+    document.getElementById("lose").innerHTML = rhit.authManager.loses;
+    rhit.drawerMenuInit();
+  }
 
 
 }
@@ -1553,6 +1577,11 @@ rhit.lobbyInit = function () {
 }
 
 rhit.drawerMenuInit = function () {
+ 
+  document.getElementById("avator").src = rhit.authManager.avatar;
+  document.getElementById("username").innerHTML = rhit.authManager.username;
+  
+  
   document.getElementById("menuSignOut").onclick = (event) => {
     rhit.authManager.signOut();
   }
@@ -1561,6 +1590,9 @@ rhit.drawerMenuInit = function () {
   }
   document.getElementById("menuPublicLists").onclick = (event) => {
     window.location.href = `/publicList.html`
+  }
+  document.getElementById("menuGameStat").onclick = (event) => {
+    window.location.href = `/stat.html`
   }
 }
 
