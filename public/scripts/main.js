@@ -1414,7 +1414,7 @@ rhit.MyListController = class {
 rhit.PublicListController = class {
   constructor() {
     rhit.fbPublicListsManager.beginListening(this.updateView.bind(this));
-    console.log(rhit.fbPublicListsManager._listId)
+
   }
   updateView() {
     // for displaying all public list 
@@ -1434,8 +1434,9 @@ rhit.PublicListController = class {
               <div>
                   <h5 class="card-title"${list.name}</h5>
                   <p>${playerModel.username} </p>
-                  <button>Save</button>
-                 
+                  <button type="button" id=${list.id}Save data-toggle="modal"
+                  data-target="#savePublicListModal">Save</button>
+                
               </div>
             
             <div style="height: 3px; background-color:#673AB7"></div>
