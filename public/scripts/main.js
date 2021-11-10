@@ -1407,11 +1407,13 @@ rhit.MyListController = class {
       console.log("Updating list", rhit.fbListsManager.currentList)
       this.updateList(rhit.fbListsManager.currentList);
     }
-    document.getElementById("fab").onclick = (event) => {
-      document.getElementById("submitUpdateList").hidden = true;
-      document.getElementById("submitNewList").hidden = false;
-      document.getElementById("modalTitle").innerHTML = "Create New List"
+
+    document.getElementById("deleteListButton").onclick = (event) => {
+      console.log("Deleting list", rhit.fbListsManager.currentList)
+      rhit.fbListsManager.deleteList(rhit.fbListsManager.currentList);
+      $("#deleteModal").modal("hide");
     }
+
     $('#createListModal').on("hide.bs.modal", (event) => {
       for (let i = 0; i < 12; i++) {
         document.getElementById(`cat${i}Input`).value = "";
@@ -1433,9 +1435,15 @@ rhit.MyListController = class {
         document.getElementById("editListName").value = list.name;
         document.getElementById("editInputPublic").checked = list.isPublic;
         rhit.fbListsManager._listId = list.id;
-      })
-
+      })      
     });
+
+    $('#deleteModal').on("show.bs.modal", (event) => {
+      const button = $(event.relatedTarget);
+      const listId = button.data("listid");
+      rhit.fbListsManager._listId = listId;
+    })
+
 
   }
   updateView() {
@@ -1457,9 +1465,8 @@ rhit.MyListController = class {
                             <div>
                                 <h5 id="list-${list.id}"  class="card-title">${list.name}</h5>
                                 <button id="edit-${list.id}" class="btn cardButton" data-listid="${list.id}" data-toggle="modal" data-target="#editListModal">EDIT</button>
-                                <button id="delete-${list.id}" class="btn cardButton">DELETE</button>
+                                <button id="delete-${list.id}" class="btn cardButton" data-listid="${list.id}" data-toggle="modal" data-target="#deleteModal">DELETE</button>
                             </div>
-    
                             <div style="height: 3px; background-color:#673AB7"></div>
                         </div>
                     </div>`);
@@ -1471,35 +1478,6 @@ rhit.MyListController = class {
     oldList.hidden = true;
     oldList.removeAttribute("id");
     oldList.parentElement.appendChild(publicListDiv);
-
-    // rhit.fbListsManager.customLists.forEach((list) => {
-    //   console.log("wyd", list.id)
-    //   document.getElementById(`edit-${list.id}`).onclick = (event) => {
-    //     document.getElementById("modalTitle").innerHTML = "Edit List";
-    //     rhit.fbListsManager.getListById(list.id).then((list) =>{
-    //       document.getElementById("inputListName").value = list.name;
-    //       document.getElementById("inputPublic").checked = list.isPublic;
-    //       for (let i = 0; i < 12; i++) {
-    //         document.getElementById(`cat${i}Input`).value = list.categories[i];
-    //       }
-    //     }) 
-    //     document.getElementById("submitUpdateList").hidden = false;
-    //     document.getElementById("submitNewList").hidden = true;
-    //     document.getElementById("modalTitle").innerHTML = "Update List"
-    //     rhit.fbListsManager._listId = list.id;
-    //   }
-
-    //   document.getElementById(`delete-${list.id}`).onclick = (event) => {
-    //     console.log("Clicked deletes")
-    //     rhit.fbListsManager.deleteList(list.id);
-    //   }
-
-    //   console.log("Set onclicks");
-    //   console.log(document.getElementById(`delete-${list.id}`))
-
-    // })
-    // }
-
   }
 
   addList() {
@@ -1519,13 +1497,13 @@ rhit.MyListController = class {
 
   updateList(listId) {
     const owner = rhit.authManager.uid;
-    const name = document.getElementById("inputListName").value;
-    const isPublic = document.getElementById("inputPublic").checked;
+    const name = document.getElementById("editListName").value;
+    const isPublic = document.getElementById("editInputPublic").checked;
     const categories = [];
     const id = listId;
 
     for (let i = 0; i < 12; i++) {
-      categories.push(document.getElementById(`cat${i}Input`).value);
+      categories.push(document.getElementById(`edit${i}Input`).value);
     }
 
     const newList = new rhit.ListModel(id, name, owner, categories, isPublic);
