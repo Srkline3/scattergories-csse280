@@ -1280,14 +1280,14 @@ rhit.FbListsManager = class {
 
   }
   createList(list) {
-    if(list.id == -1){
+    if (list.id == -1) {
       this._ref.add({
         Name: list.name,
         Owner: list.owner,
         public: list.isPublic,
         Categories: list.categories
       }).catch(err => console.error(err));
-    }else{
+    } else {
       this._ref.doc(list.id).update({
         Name: list.name,
         Owner: list.owner,
@@ -1367,10 +1367,11 @@ rhit.MyListController = class {
   constructor() {
     rhit.fbListsManager.beginListening(this.updateView.bind(this));
     document.getElementById("submitNewList").onclick = (event) => {
-      this.addOrUpdateList();
+      this.addList();
     }
     document.getElementById("submitUpdateList").onclick = (event) => {
-      this.addOrUpdateList(rhit.fbListsManager.currentList);
+      console.log("Updating list", rhit.fbListsManager.currentList)
+      this.updateList(rhit.fbListsManager.currentList);
     }
     document.getElementById("fab").onclick = (event) => {
       document.getElementById("submitUpdateList").hidden = true;
@@ -1387,91 +1388,118 @@ rhit.MyListController = class {
     $('#createListModal').on("shown.bs.modal", (event) => {
       document.querySelector("#inputListName").focus();
     });
+
+    $('#editListModal').on("show.bs.modal", (event) => {
+      const button = $(event.relatedTarget);
+      const listId = button.data("listid");
+      rhit.fbListsManager.getListById(listId).then((list) => {
+        for (let i = 0; i < 12; i++) {
+          document.getElementById(`edit${i}Input`).value = list.categories[i];
+        }
+        document.getElementById("editListName").value = list.name;
+        document.getElementById("editInputPublic").checked = list.isPublic;
+        rhit.fbListsManager._listId = list.id;
+      })
+
+    });
+
   }
   updateView() {
     // for displaying all public list 
     // if (!rhit.fbListsManager.currentList) {
-      console.log(rhit.fbListsManager.customLists);
-      const publicListDiv = htmlToElement(`<div id="listColumns"></div>`);
-      rhit.fbListsManager.customLists.forEach((list) => {
-        let categories = htmlToElement(`<ol></ol>`);
-        list.categories.forEach((category) => {
-          let cate = htmlToElement(`<li>${category}</li>`)
-          categories.appendChild(cate);
-        }
-        );
+    console.log(rhit.fbListsManager.customLists);
+    const publicListDiv = htmlToElement(`<div id="listColumns"></div>`);
+    rhit.fbListsManager.customLists.forEach((list) => {
+      let categories = htmlToElement(`<ol></ol>`);
+      list.categories.forEach((category) => {
+        let cate = htmlToElement(`<li>${category}</li>`)
+        categories.appendChild(cate);
+      }
+      );
 
-        let listcard = htmlToElement(`
+      let listcard = htmlToElement(`
           <div class="card" style="width: 18rem;">
                         <div class="card-body">
                             <div>
                                 <h5 id="list-${list.id}"  class="card-title">${list.name}</h5>
-                                <button id="edit-${list.id}" class="btn cardButton" data-toggle="modal" data-target="#createListModal">EDIT</button>
+                                <button id="edit-${list.id}" class="btn cardButton" data-listid="${list.id}" data-toggle="modal" data-target="#editListModal">EDIT</button>
                                 <button id="delete-${list.id}" class="btn cardButton">DELETE</button>
                             </div>
     
                             <div style="height: 3px; background-color:#673AB7"></div>
                         </div>
                     </div>`);
-        listcard.childNodes[1].appendChild(categories);
-        publicListDiv.appendChild(listcard)
-      });
+      listcard.childNodes[1].appendChild(categories);
+      publicListDiv.appendChild(listcard)
+    });
 
-      const oldList = document.querySelector("#listColumns");
-      oldList.hidden = true;
-      oldList.removeAttribute("id");
-      oldList.parentElement.appendChild(publicListDiv);
+    const oldList = document.querySelector("#listColumns");
+    oldList.hidden = true;
+    oldList.removeAttribute("id");
+    oldList.parentElement.appendChild(publicListDiv);
 
-      // rhit.fbListsManager.customLists.forEach((list) => {
-      //   console.log("wyd", list.id)
-      //   document.getElementById(`edit-${list.id}`).onclick = (event) => {
-      //     document.getElementById("modalTitle").innerHTML = "Edit List";
-      //     rhit.fbListsManager.getListById(list.id).then((list) =>{
-      //       document.getElementById("inputListName").value = list.name;
-      //       document.getElementById("inputPublic").checked = list.isPublic;
-      //       for (let i = 0; i < 12; i++) {
-      //         document.getElementById(`cat${i}Input`).value = list.categories[i];
-      //       }
-      //     }) 
-      //     document.getElementById("submitUpdateList").hidden = false;
-      //     document.getElementById("submitNewList").hidden = true;
-      //     document.getElementById("modalTitle").innerHTML = "Update List"
-      //     rhit.fbListsManager._listId = list.id;
-      //   }
+    // rhit.fbListsManager.customLists.forEach((list) => {
+    //   console.log("wyd", list.id)
+    //   document.getElementById(`edit-${list.id}`).onclick = (event) => {
+    //     document.getElementById("modalTitle").innerHTML = "Edit List";
+    //     rhit.fbListsManager.getListById(list.id).then((list) =>{
+    //       document.getElementById("inputListName").value = list.name;
+    //       document.getElementById("inputPublic").checked = list.isPublic;
+    //       for (let i = 0; i < 12; i++) {
+    //         document.getElementById(`cat${i}Input`).value = list.categories[i];
+    //       }
+    //     }) 
+    //     document.getElementById("submitUpdateList").hidden = false;
+    //     document.getElementById("submitNewList").hidden = true;
+    //     document.getElementById("modalTitle").innerHTML = "Update List"
+    //     rhit.fbListsManager._listId = list.id;
+    //   }
 
-      //   document.getElementById(`delete-${list.id}`).onclick = (event) => {
-      //     console.log("Clicked deletes")
-      //     rhit.fbListsManager.deleteList(list.id);
-      //   }
+    //   document.getElementById(`delete-${list.id}`).onclick = (event) => {
+    //     console.log("Clicked deletes")
+    //     rhit.fbListsManager.deleteList(list.id);
+    //   }
 
-      //   console.log("Set onclicks");
-      //   console.log(document.getElementById(`delete-${list.id}`))
+    //   console.log("Set onclicks");
+    //   console.log(document.getElementById(`delete-${list.id}`))
 
-      // })
+    // })
     // }
 
   }
 
-  addOrUpdateList(listid){
+  addList() {
     const owner = rhit.authManager.uid;
     const name = document.getElementById("inputListName").value;
     const isPublic = document.getElementById("inputPublic").checked;
     const categories = [];
+    const id = -1;
 
     for (let i = 0; i < 12; i++) {
       categories.push(document.getElementById(`cat${i}Input`).value);
     }
 
-    let id;
-    if(listid){
-      id = listid;
-    }else{
-      id = -1;
+    const newList = new rhit.ListModel(id, name, owner, categories, isPublic);
+    rhit.fbListsManager.createList(newList);
+  }
+
+  updateList(listId) {
+    const owner = rhit.authManager.uid;
+    const name = document.getElementById("inputListName").value;
+    const isPublic = document.getElementById("inputPublic").checked;
+    const categories = [];
+    const id = listId;
+
+    for (let i = 0; i < 12; i++) {
+      categories.push(document.getElementById(`cat${i}Input`).value);
     }
+
     const newList = new rhit.ListModel(id, name, owner, categories, isPublic);
     rhit.fbListsManager.createList(newList);
   }
 }
+
+
 
 rhit.PublicListController = class {
   constructor() {
