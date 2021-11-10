@@ -1345,6 +1345,7 @@ rhit.FbPublicListsManager = class {
   constructor(listId) {
     this._documentSnapshots = [];
     this._ref = firebase.firestore().collection("Lists").where("public", "==", true);
+    this._listRef = firebase.firestore().collection("Lists");
     this._unsub = null;
     this._listId = listId;
   }
@@ -1367,9 +1368,21 @@ rhit.FbPublicListsManager = class {
     });
     return lists;
   }
-
+  
   savePublicList(listId){
+   this._listRef.doc(listId).get().then((list) => {
+      var name =list.get("Name");
+      var categories= list.get("Categories");
       
+      return this._listRef.add({
+        Name:name,
+        Owner:rhit.authManager.uid,
+        public:false,
+        Categories:categories
+      }).catch(err => console.error(err));
+    });
+  
+    // console.log(list)
   }
 
 }
@@ -1422,7 +1435,8 @@ rhit.PublicListController = class {
      var button = $(event.relatedTarget)
 
       document.querySelector("#saveConfirmBtn").onclick = (event) => {
-        console.log(button.data('listid'))
+        rhit.fbPublicListsManager.savePublicList(button.data('listid'));
+        $("#savePublicListModal").modal("hide");
       }
 			
 		});
