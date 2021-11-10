@@ -805,7 +805,7 @@ rhit.VoteController = class {
 
         //Give the div a value that we change on click. Then when the submit button is hit, we need to get all the vals from the divs and submit them.
 
-        
+
 
       })
 
@@ -1198,11 +1198,7 @@ rhit.FBResultsManager = class {
 
         htmlForResults.appendChild(result);
       });
-
     });
-
-
-
   }
 
   get playerInputs() {
@@ -1240,11 +1236,7 @@ rhit.ResultsController = class {
         rhit.fbSingleLobbyManager.deleteGame();
         window.location.href = `/lobby.html?lobby=${lobby}`
       }
-
     })
-
-
-
   }
 
   updateView() {
@@ -1287,8 +1279,27 @@ rhit.FbListsManager = class {
   editMyList() {
 
   }
-  publicMyList(myListId) {
+  createList(list) {
+    if(list.id == -1){
+      this._ref.add({
+        Name: list.name,
+        Owner: list.owner,
+        public: list.isPublic,
+        Categories: list.categories
+      }).catch(err => console.error(err));
+    }else{
+      this._ref.doc(list.id).update({
+        Name: list.name,
+        Owner: list.owner,
+        public: list.isPublic,
+        Categories: list.categories
+      })
+    }
 
+  }
+
+  deleteList(listId) {
+    this._ref.doc(listId).delete().catch(err => console.error(err));
   }
 
   get customLists() {
@@ -1296,8 +1307,6 @@ rhit.FbListsManager = class {
     this._documentSnapshots.forEach((snap) => {
       lists.push(new rhit.ListModel(snap.id, snap.get("Name"), snap.get("Owner"), snap.get("Categories"), snap.get("public")));
     });
-
-    console.log("All lists:", lists);
 
     lists = lists.filter((list) => {
       return list.owner == rhit.authManager.uid;
@@ -1357,16 +1366,37 @@ rhit.FbPublicListsManager = class {
 rhit.MyListController = class {
   constructor() {
     rhit.fbListsManager.beginListening(this.updateView.bind(this));
+    document.getElementById("submitNewList").onclick = (event) => {
+      this.addOrUpdateList();
+    }
+    document.getElementById("submitUpdateList").onclick = (event) => {
+      this.addOrUpdateList(rhit.fbListsManager.currentList);
+    }
+    document.getElementById("fab").onclick = (event) => {
+      document.getElementById("submitUpdateList").hidden = true;
+      document.getElementById("submitNewList").hidden = false;
+      document.getElementById("modalTitle").innerHTML = "Create New List"
+    }
+    $('#createListModal').on("hide.bs.modal", (event) => {
+      for (let i = 0; i < 12; i++) {
+        document.getElementById(`cat${i}Input`).value = "";
+      }
+      document.getElementById("inputListName").value = "";
+    });
+
+    $('#createListModal').on("shown.bs.modal", (event) => {
+      document.querySelector("#inputListName").focus();
+    });
   }
   updateView() {
     // for displaying all public list 
-    if (!rhit.fbListsManager.currentList) {
+    // if (!rhit.fbListsManager.currentList) {
       console.log(rhit.fbListsManager.customLists);
-      const publicListDiv = document.querySelector("#listColumns");
+      const publicListDiv = htmlToElement(`<div id="listColumns"></div>`);
       rhit.fbListsManager.customLists.forEach((list) => {
         let categories = htmlToElement(`<ol></ol>`);
         list.categories.forEach((category) => {
-          let cate = htmlToElement(`<li>${category} </li>`)
+          let cate = htmlToElement(`<li>${category}</li>`)
           categories.appendChild(cate);
         }
         );
@@ -1375,9 +1405,9 @@ rhit.MyListController = class {
           <div class="card" style="width: 18rem;">
                         <div class="card-body">
                             <div>
-                                <h5 class="card-title">${list.name}</h5>
-                                <button>EDIT</button>
-                                <button>X</button>
+                                <h5 id="list-${list.id}"  class="card-title">${list.name}</h5>
+                                <button id="edit-${list.id}" class="btn cardButton" data-toggle="modal" data-target="#createListModal">EDIT</button>
+                                <button id="delete-${list.id}" class="btn cardButton">DELETE</button>
                             </div>
     
                             <div style="height: 3px; background-color:#673AB7"></div>
@@ -1385,13 +1415,60 @@ rhit.MyListController = class {
                     </div>`);
         listcard.childNodes[1].appendChild(categories);
         publicListDiv.appendChild(listcard)
+      });
+
+      const oldList = document.querySelector("#listColumns");
+      oldList.hidden = true;
+      oldList.removeAttribute("id");
+      oldList.parentElement.appendChild(publicListDiv);
+
+      rhit.fbListsManager.customLists.forEach((list) => {
+        console.log("wyd", list.id)
+        document.getElementById(`edit-${list.id}`).onclick = (event) => {
+          document.getElementById("modalTitle").innerHTML = "Edit List";
+          rhit.fbListsManager.getListById(list.id).then((list) =>{
+            document.getElementById("inputListName").value = list.name;
+            document.getElementById("inputPublic").checked = list.isPublic;
+            for (let i = 0; i < 12; i++) {
+              document.getElementById(`cat${i}Input`).value = list.categories[i];
+            }
+          }) 
+          document.getElementById("submitUpdateList").hidden = false;
+          document.getElementById("submitNewList").hidden = true;
+          document.getElementById("modalTitle").innerHTML = "Update List"
+          rhit.fbListsManager._listId = list.id;
+        }
+        document.getElementById(`delete-${list.id}`).onclick = (event) => {
+          console.log("Clicked deletes")
+          rhit.fbListsManager.deleteList(list.id);
+        }
+
+        console.log("Set onclicks");
 
       })
-    }
+    // }
+
   }
 
+  addOrUpdateList(listid){
+    const owner = rhit.authManager.uid;
+    const name = document.getElementById("inputListName").value;
+    const isPublic = document.getElementById("inputPublic").checked;
+    const categories = [];
 
+    for (let i = 0; i < 12; i++) {
+      categories.push(document.getElementById(`cat${i}Input`).value);
+    }
 
+    let id;
+    if(listid){
+      id = listid;
+    }else{
+      id = -1;
+    }
+    const newList = new rhit.ListModel(id, name, owner, categories, isPublic);
+    rhit.fbListsManager.createList(newList);
+  }
 }
 
 rhit.PublicListController = class {

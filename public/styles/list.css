@@ -26,3 +26,18 @@
      transform: translateY(2px);
      opacity: 0.8;
  }
+
+ #modalTitle{
+     margin: 15px;
+ }
+
+ #listColumns{
+     overflow: hidden;
+ }
+
+ .cardButton{
+     color: #673AB7;
+     border-color: white;
+     padding: 0px;
+     margin-left: 5px;
+ }
