@@ -63,6 +63,12 @@ function checkTime(i) {
   return i;
 }
 
+function removeAllChildNodes(parent) {
+  while (parent.firstChild) {
+      parent.removeChild(parent.firstChild);
+  }
+}
+
 function showTimer() {
   let time = rhit.fbSingleGameManager.roundOverTime.toDate();
   let currentTime = new Date();
@@ -1154,6 +1160,7 @@ rhit.GameController = class {
 
     console.log("Scores ", rhit.fbSingleGameManager.scores);
     const playersInfo = document.getElementsByClassName("dropdown-content");
+    removeAllChildNodes(playersInfo[0]);
     for (const [player, score] of Object.entries(rhit.fbSingleGameManager.scores)) {
       rhit.fbUsersManager.getUserInfo(player).then((player) => {
         playersInfo[0].appendChild(htmlToElement(`<p>${player.username} ${score}</p>`));
