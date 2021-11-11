@@ -1539,9 +1539,9 @@ rhit.PublicListController = class {
           let listcard = htmlToElement(`<div class="card" style="width: 18rem;">
           <div class="card-body">
               <div>
-                  <h5 class="card-title"${list.name}</h5>
-                  <p>${playerModel.username} </p>
-                  <button type="button" data-toggle="modal" id="saveBtn"
+                  <h5 class="card-title">List Name: ${list.name}</h5>
+                  <p>Author: ${playerModel.username} </p>
+                  <button type="button" class="btn cardButton" data-toggle="modal" id="saveBtn"
                   data-target="#savePublicListModal" data-listId=${list.id}>Save</button>
                 
               </div>
