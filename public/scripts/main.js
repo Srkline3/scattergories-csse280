@@ -542,7 +542,6 @@ rhit.LobbyController = class {
 
     document.getElementById("startGameButton").onclick = () => {
       let newGame = new rhit.GameModel(null, rhit.fbSingleLobbyManager.players);
-
       let currentTime = firebase.firestore.Timestamp.now().toDate();
       currentTime.setMinutes(currentTime.getMinutes() + rhit.fbSingleLobbyManager.timeforRound);
       newGame.lists = rhit.fbSingleLobbyManager.lists;
@@ -552,14 +551,10 @@ rhit.LobbyController = class {
       newGame.timeForRound = rhit.fbSingleLobbyManager.timeforRound;
       newGame.lobby = rhit.fbSingleLobbyManager.lobbyId;
       rhit.fbSingleLobbyManager.addGame(newGame).then((game) => {
-
         console.log("Starting game:", game)
         rhit.fbSingleLobbyManager.startGame(game);
-
       });
-
     }
-
   }
   updateView() {
     if (!rhit.fbSingleLobbyManager.game) {
@@ -587,9 +582,6 @@ rhit.LobbyController = class {
         document.getElementById("waitingText").style.display = "none";
       }
     } else {
-      window.onbeforeunload = () => {
-        /*do nothing */
-      }
       window.location.href = `/gameMain.html?gameId=${rhit.fbSingleLobbyManager.game}`
     }
 
@@ -738,7 +730,6 @@ rhit.VoteController = class {
 
         rhit.fbPlayerInputsManager.updateScore(this.votes).then((idk) => {
           if (this.index >= 11) {
-            //TODO: Round over code!
             rhit.fbPlayerInputsManager.listenForVotingDone(this.doneVotingHandler.bind(this));
             rhit.fbPlayerInputsManager.votingDone();
 

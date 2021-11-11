@@ -1,6 +1,20 @@
 #listColumns {
-    column-count: 3;
+    column-count: 1;
     column-gap: 5px;
+}
+
+@media (min-width: 768px) {
+    #listColumns {
+        column-count: 2;
+        column-gap: 10px;
+    }
+}
+
+@media (min-width: 992px) {
+    #listColumns {
+        column-count: 3;
+        column-gap: 10px;
+    }
 }
 
 .card {
