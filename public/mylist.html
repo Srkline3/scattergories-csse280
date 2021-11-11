@@ -24,12 +24,12 @@
         </header>
         <div id="dw-s1" class="bmd-layout-drawer bg-faded">
             <header>
-              
+
                 <a class="navbar-brand" id="username"></a>
                 <img src="" alt="" id="avator">
             </header>
             <ul class="list-group">
-				<a class="list-group-item" id="menuGameStat"><i class="material-icons">face</i>Game Stat</a>
+                <a class="list-group-item" id="menuGameStat"><i class="material-icons">face</i>Game Stat</a>
 
                 <a class="list-group-item" id="menuMyLists"><i class="material-icons">list_alt</i>My Lists</a>
                 <a class="list-group-item" id="menuPublicLists"><i class="material-icons">receipt_long</i>Public
@@ -53,90 +53,97 @@
             aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <h5 id="modalTitle">Create New List</h5>
-                    <div class="modal-header">
-                        <div class="form-group bmd-form-group">
-                            <label for="inputListName" class=" ">List Name</label>
-                            <input type="text" class="form-control" id="inputListName">
-                        </div>
-                        <div class="checkbox">
-                            <label>
-                                <input id="inputPublic" type="checkbox">Make Public
-                            </label>
-                        </div>
+                    <h5 id="modalTitle">Create A New List</h5>
+                    <form id="myCreateListForm" role="form">
+                        <div class="modal-header">
 
-                    </div>
-                    <div class="modal-body container">
-                        <div class="form-group bmd-form-group">
-                            <label for="cat0Input" class=" ">Category 1</label>
-                            <input type="text" class="form-control" id="cat0Input">
+                            <div class="form-group bmd-form-group">
+                                <label for="inputListName" class=" ">List Name</label>
+                                <input type="text" class="form-control" id="inputListName" required>
+                            </div>
+                            <div class="checkbox">
+                                <label>
+                                    <input id="inputPublic" type="checkbox">Make Public
+                                </label>
+                            </div>
+
                         </div>
-                        <div class="form-group bmd-form-group">
-                            <label for="cat1Input" class=" ">Category 2</label>
-                            <input type="text" class="form-control" id="cat1Input">
+                        <div class="modal-body container">
+
+                            <div class="form-group bmd-form-group">
+                                <label for="cat0Input" class=" ">Category 1</label>
+                                <input type="text" class="form-control" id="cat0Input" required minlength="1">
+                                <div class="valid-feedback">Valid.</div>
+                                <div class="invalid-feedback">Please fill out this field.</div>
+                            </div>
+                            <div class="form-group bmd-form-group">
+                                <label for="cat1Input" class=" ">Category 2</label>
+                                <input type="text" class="form-control" id="cat1Input" required minlength="1">
+                            </div>
+                            <div class="form-group bmd-form-group">
+                                <label for="cat2Input" class=" ">Category 3</label>
+                                <input type="text" class="form-control" id="cat2Input" required minlength="1">
+                            </div>
+                            <div class="form-group bmd-form-group">
+                                <label for="cat3Input" class=" ">Category 4</label>
+                                <input type="text" class="form-control" id="cat3Input" required minlength="1">
+                            </div>
+                            <div class="form-group bmd-form-group">
+                                <label for="cat4Input" class=" ">Category 5</label>
+                                <input type="text" class="form-control" id="cat4Input" required minlength="1">
+                            </div>
+                            <div class="form-group bmd-form-group">
+                                <label for="cat5Input" class=" ">Category 6</label>
+                                <input type="text" class="form-control" id="cat5Input" required minlength="1">
+                            </div>
+                            <div class="form-group bmd-form-group">
+                                <label for="cat6Input" class=" ">Category 7</label>
+                                <input type="text" class="form-control" id="cat6Input" required minlength="1">
+                            </div>
+                            <div class="form-group bmd-form-group">
+                                <label for="cat7Input" class=" ">Category 8</label>
+                                <input type="text" class="form-control" id="cat7Input" required minlength="1">
+                            </div>
+                            <div class="form-group bmd-form-group">
+                                <label for="cat8Input" class=" ">Category 9</label>
+                                <input type="text" class="form-control" id="cat8Input" required minlength="1">
+                            </div>
+                            <div class="form-group bmd-form-group">
+                                <label for="cat9Input" class=" ">Category 10</label>
+                                <input type="text" class="form-control" id="cat9Input" required minlength="1">
+                            </div>
+                            <div class="form-group bmd-form-group">
+                                <label for="cat10Input" class=" ">Category 11</label>
+                                <input type="text" class="form-control" id="cat10Input" required minlength="1">
+                            </div>
+                            <div class="form-group bmd-form-group">
+                                <label for="cat11Input" class=" ">Category 12</label>
+                                <input type="text" class="form-control" id="cat11Input" required minlength="1">
+                            </div>
+
+
                         </div>
-                        <div class="form-group bmd-form-group">
-                            <label for="cat2Input" class=" ">Category 3</label>
-                            <input type="text" class="form-control" id="cat2Input">
-                        </div>
-                        <div class="form-group bmd-form-group">
-                            <label for="cat3Input" class=" ">Category 4</label>
-                            <input type="text" class="form-control" id="cat3Input">
-                        </div>
-                        <div class="form-group bmd-form-group">
-                            <label for="cat4Input" class=" ">Category 5</label>
-                            <input type="text" class="form-control" id="cat4Input">
-                        </div>
-                        <div class="form-group bmd-form-group">
-                            <label for="cat5Input" class=" ">Category 6</label>
-                            <input type="text" class="form-control" id="cat5Input">
-                        </div>
-                        <div class="form-group bmd-form-group">
-                            <label for="cat6Input" class=" ">Category 7</label>
-                            <input type="text" class="form-control" id="cat6Input">
-                        </div>
-                        <div class="form-group bmd-form-group">
-                            <label for="cat7Input" class=" ">Category 8</label>
-                            <input type="text" class="form-control" id="cat7Input">
-                        </div>
-                        <div class="form-group bmd-form-group">
-                            <label for="cat8Input" class=" ">Category 9</label>
-                            <input type="text" class="form-control" id="cat8Input">
-                        </div>
-                        <div class="form-group bmd-form-group">
-                            <label for="cat9Input" class=" ">Category 10</label>
-                            <input type="text" class="form-control" id="cat9Input">
-                        </div>
-                        <div class="form-group bmd-form-group">
-                            <label for="cat10Input" class=" ">Category 11</label>
-                            <input type="text" class="form-control" id="cat10Input">
-                        </div>
-                        <div class="form-group bmd-form-group">
-                            <label for="cat11Input" class=" ">Category 12</label>
-                            <input type="text" class="form-control" id="cat11Input">
-                        </div>
-                    </div>
+                    </form>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">
                             Close
                         </button>
-                        <button type="button" id="submitNewList" data-dismiss="modal"
-                            class="btn btn-primary">Create</button>
+                        <button type="submit" id="submitNewList" class="btn btn-primary">Create</button>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- edit modal -->
-        <div class="modal fade" id="editListModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-            aria-hidden="true">
+        <div class="modal fade" id="editListModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <h5 id="editModalTitle">Edit List</h5>
+                    <form id="myEditListForm" role="form">
                     <div class="modal-header">
                         <div class="form-group bmd-form-group">
                             <label for="editListName" class=" ">List Name</label>
-                            <input type="text" class="form-control" id="editListName">
+                            <input type="text" class="form-control" id="editListName" required>
                         </div>
                         <div class="checkbox">
                             <label>
@@ -148,58 +155,59 @@
                     <div class="modal-body container">
                         <div class="form-group bmd-form-group">
                             <label for="edit0Input" class=" ">Category 1</label>
-                            <input type="text" class="form-control" id="edit0Input">
+                            <input type="text" class="form-control" id="edit0Input" required minlength="1">
                         </div>
                         <div class="form-group bmd-form-group">
                             <label for="edit1Input" class=" ">Category 2</label>
-                            <input type="text" class="form-control" id="edit1Input">
+                            <input type="text" class="form-control" id="edit1Input" required minlength="1">
                         </div>
                         <div class="form-group bmd-form-group">
                             <label for="edit2Input" class=" ">Category 3</label>
-                            <input type="text" class="form-control" id="edit2Input">
+                            <input type="text" class="form-control" id="edit2Input" required minlength="1">
                         </div>
                         <div class="form-group bmd-form-group">
                             <label for="edit3Input" class=" ">Category 4</label>
-                            <input type="text" class="form-control" id="edit3Input">
+                            <input type="text" class="form-control" id="edit3Input" required minlength="1">
                         </div>
                         <div class="form-group bmd-form-group">
                             <label for="edit4Input" class=" ">Category 5</label>
-                            <input type="text" class="form-control" id="edit4Input">
+                            <input type="text" class="form-control" id="edit4Input" required minlength="1">
                         </div>
                         <div class="form-group bmd-form-group">
                             <label for="edit5Input" class=" ">Category 6</label>
-                            <input type="text" class="form-control" id="edit5Input">
+                            <input type="text" class="form-control" id="edit5Input" required minlength="1">
                         </div>
                         <div class="form-group bmd-form-group">
                             <label for="edit6Input" class=" ">Category 7</label>
-                            <input type="text" class="form-control" id="edit6Input">
+                            <input type="text" class="form-control" id="edit6Input" required minlength="1">
                         </div>
                         <div class="form-group bmd-form-group">
                             <label for="edit7Input" class=" ">Category 8</label>
-                            <input type="text" class="form-control" id="edit7Input">
+                            <input type="text" class="form-control" id="edit7Input" required minlength="1">
                         </div>
                         <div class="form-group bmd-form-group">
                             <label for="edit8Input" class=" ">Category 9</label>
-                            <input type="text" class="form-control" id="edit8Input">
+                            <input type="text" class="form-control" id="edit8Input" required minlength="1">
                         </div>
                         <div class="form-group bmd-form-group">
                             <label for="edit9Input" class=" ">Category 10</label>
-                            <input type="text" class="form-control" id="edit9Input">
+                            <input type="text" class="form-control" id="edit9Input" required minlength="1">
                         </div>
                         <div class="form-group bmd-form-group">
                             <label for="edit10Input" class=" ">Category 11</label>
-                            <input type="text" class="form-control" id="edit10Input">
+                            <input type="text" class="form-control" id="edit10Input" required minlength="1">
                         </div>
                         <div class="form-group bmd-form-group">
                             <label for="edit11Input" class=" ">Category 12</label>
-                            <input type="text" class="form-control" id="edit11Input">
+                            <input type="text" class="form-control" id="edit11Input" required minlength="1">
                         </div>
                     </div>
+                    </form>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">
                             Close
                         </button>
-                        <button type="button" id="submitUpdateList" data-dismiss="modal"
+                        <button type="button" id="submitUpdateList"
                             class="btn btn-primary">Update</button>
                     </div>
                 </div>
@@ -207,23 +215,23 @@
         </div>
         <div class="modal" id="deleteModal" tabindex="-1" role="dialog">
             <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title">Delete List?</h5>
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Delete List?</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you would like to delete this list? </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="deleteListButton" type="button" class="btn btn-primary">Delete 💀</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Never mind</button>
+                    </div>
                 </div>
-                <div class="modal-body">
-                  <p>Are you sure you would like to delete this list? </p>
-                </div>
-                <div class="modal-footer">
-                  <button id="deleteListButton" type="button" class="btn btn-primary">Delete 💀</button>
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Never mind</button>
-                </div>
-              </div>
             </div>
-          </div>
+        </div>
 
     </div>
 
@@ -241,6 +249,7 @@
     <script src="/__/firebase/7.18.0/firebase-firestore.js"></script>
     <script src="/__/firebase/init.js"></script>
     <script src="scripts/main.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.5/validator.min.js"></script>
 </body>
 
 </html>
