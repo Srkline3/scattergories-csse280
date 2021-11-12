@@ -352,16 +352,15 @@ rhit.LobbyListController = class {
     console.log("Lobby Lenght:", rhit.fbLobbyManager.length)
     const lobList = htmlToElement('<div id="lobbies" class="overflow-auto"></div>');
 
+    console.log("Lobby things")
     for (let i = 0; i < rhit.fbLobbyManager.length; i++) {
       const lob = rhit.fbLobbyManager.getLobbyAtIndex(i);
-      console.log("Got lobby:", lob);
+      // console.log("Got lobby:", lob);
       if (lob.players.length > 0) {
         lobList.appendChild(this.createJoinLobby(lob));
       } else {
         rhit.fbLobbyManager.deleteLobby(lob.lobbyId);
       }
-
-
     }
 
     const oldList = document.getElementById("lobbies");
@@ -373,19 +372,22 @@ rhit.LobbyListController = class {
       const lob = rhit.fbLobbyManager.getLobbyAtIndex(i);
 
       const lobEl = document.getElementById(`lobButt${lob.lobbyId}`);
-
-      console.log("Max: ")
+      // console.log("Current : ",lob.players.length)
+      // console.log("Max: ",lob.maxPlayers)
 
       if (lob.players.length < lob.maxPlayers) {
         lobEl.onclick = (event) => {
           console.log("You joined: ", lob.lobbyId);
           window.location.href = `/lobby.html?lobby=${lob.lobbyId}`
         }
-      } else {
-        lobEl.classList.remove("our-button-secondary");
-        lobEl.classList.add("our-button-inactive");
-        lobEl.innerHTML = "FULL";
-      }
+      } 
+      // else {
+      //   console.log("Lobby full things");
+      //   lobEl.classList.remove("our-button-secondary");
+      //   lobEl.classList.add("our-button-inactive");
+      //   lobEl.innerHTML = "FULL";
+      //   console.log("PLEASE!")
+      // }
     }
   }
 
@@ -420,12 +422,23 @@ rhit.LobbyListController = class {
   }
 
   createJoinLobby(lobby) {
-    const lobbyHtml = htmlToElement(
-      `<div class ="lobby">
-        <h2>${lobby.lobbyName}</h2>
-        <h3>${lobby.players.length}/${lobby.maxPlayers}</h3>
-        <button id="lobButt${lobby.lobbyId}" type="button" class="btn our-button-secondary">Join</button>
-      </div>`);
+    let lobbyHtml;
+    if(lobby.players.length < lobby.maxPlayers){
+      lobbyHtml = htmlToElement(
+        `<div class ="lobby">
+          <h2>${lobby.lobbyName}</h2>
+          <h3>${lobby.players.length}/${lobby.maxPlayers}</h3>
+          <button id="lobButt${lobby.lobbyId}" type="button" class="btn our-button-secondary">Join</button>
+        </div>`);
+    }else{
+      lobbyHtml = htmlToElement(
+        `<div class ="lobby">
+          <h2>${lobby.lobbyName}</h2>
+          <h3>${lobby.players.length}/${lobby.maxPlayers}</h3>
+          <button id="lobButt${lobby.lobbyId}" type="button" class="btn our-button-inactive">FULL</button>
+        </div>`);
+    }
+
 
     return lobbyHtml;
   }
