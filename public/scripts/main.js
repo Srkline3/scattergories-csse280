@@ -1412,11 +1412,31 @@ rhit.MyListController = class {
   constructor() {
     rhit.fbListsManager.beginListening(this.updateView.bind(this));
     document.getElementById("submitNewList").onclick = (event) => {
-      this.addList();
+        $('#myCreateListForm').submit();
+      
     }
+    $('#myCreateListForm').validator().on('submit',  (e) =>{
+      if (e.isDefaultPrevented()) {
+        
+        console.log("some requried field are not full in things");
+      } else {
+      
+        this.addList();
+      }
+    }) ;
+    
+    $('#myEditListForm').validator().on('submit',  (e) =>{
+      if (e.isDefaultPrevented()) {
+        
+        console.log("some requried field are not full in things");
+      } else {
+      
+        this.updateList(rhit.fbListsManager.currentList);
+      }
+    }) ;
     document.getElementById("submitUpdateList").onclick = (event) => {
-      console.log("Updating list", rhit.fbListsManager.currentList)
-      this.updateList(rhit.fbListsManager.currentList);
+     // console.log("Updating list", rhit.fbListsManager.currentList)
+      $('#myEditListForm').submit();
     }
 
     document.getElementById("deleteListButton").onclick = (event) => {
@@ -1552,9 +1572,9 @@ rhit.PublicListController = class {
           let listcard = htmlToElement(`<div class="card" style="width: 18rem;">
           <div class="card-body">
               <div>
-                  <h5 class="card-title"${list.name}</h5>
-                  <p>${playerModel.username} </p>
-                  <button type="button" data-toggle="modal" id="saveBtn"
+                  <h5 class="card-title">List Name: ${list.name}</h5>
+                  <p>Author: ${playerModel.username} </p>
+                  <button type="button" class="btn cardButton" data-toggle="modal" id="saveBtn"
                   data-target="#savePublicListModal" data-listId=${list.id}>Save</button>
                 
               </div>
