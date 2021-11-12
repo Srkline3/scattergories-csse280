@@ -1412,10 +1412,15 @@ rhit.MyListController = class {
   constructor() {
     rhit.fbListsManager.beginListening(this.updateView.bind(this));
     document.getElementById("submitNewList").onclick = (event) => {
-        $('#myCreateListForm').submit();
-      
+    
     }
-    $('#myCreateListForm').validator().on('submit',  (e) =>{
+
+    document.getElementById("submitUpdateList").onclick = (event) => {
+      console.log("Updating list", rhit.fbListsManager.currentList)
+       $('#myEditListForm').submit();
+     }
+     
+    $('#myCreateListForm').validator('validate').on('submit',  (e) =>{
       if (e.isDefaultPrevented()) {
         
         console.log("some requried field are not full in things");
@@ -1436,10 +1441,8 @@ rhit.MyListController = class {
         $("#editListModal").modal("hide");
       }
     }) ;
-    document.getElementById("submitUpdateList").onclick = (event) => {
-     // console.log("Updating list", rhit.fbListsManager.currentList)
-      $('#myEditListForm').submit();
-    }
+
+
 
     document.getElementById("deleteListButton").onclick = (event) => {
       console.log("Deleting list", rhit.fbListsManager.currentList)
