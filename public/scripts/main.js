@@ -65,7 +65,7 @@ function checkTime(i) {
 
 function removeAllChildNodes(parent) {
   while (parent.firstChild) {
-      parent.removeChild(parent.firstChild);
+    parent.removeChild(parent.firstChild);
   }
 }
 
@@ -159,7 +159,7 @@ rhit.AuthManager = class {
             this._document = doc;
             changeListener();
             console.log("who is logg in now: ", this._user);
-          
+
           } else {
             // for add a user in the users collection after sign up
             this._ref.doc(user.uid)
@@ -224,19 +224,19 @@ rhit.AuthManager = class {
   get isSignedIn() {
     return !!this._user;
   }
-  get avatar(){
+  get avatar() {
     return this._document.get(rhit.FB_KEY_AVATAR);
   }
-  get username(){
+  get username() {
     return this._document.get(rhit.FB_KEY_USERNAME);
   }
-  get totalGames(){
+  get totalGames() {
     return this._document.get(rhit.FB_KEY_NUMTOTALGAME);
   }
-  get wins(){
+  get wins() {
     return this._document.get(rhit.FB_KEY_NUMWIN);
   }
-  get loses(){
+  get loses() {
     return this._document.get(rhit.FB_KEY_NUMLOSE);
   }
 }
@@ -380,7 +380,7 @@ rhit.LobbyListController = class {
           console.log("You joined: ", lob.lobbyId);
           window.location.href = `/lobby.html?lobby=${lob.lobbyId}`
         }
-      } 
+      }
       // else {
       //   console.log("Lobby full things");
       //   lobEl.classList.remove("our-button-secondary");
@@ -423,14 +423,14 @@ rhit.LobbyListController = class {
 
   createJoinLobby(lobby) {
     let lobbyHtml;
-    if(lobby.players.length < lobby.maxPlayers){
+    if (lobby.players.length < lobby.maxPlayers) {
       lobbyHtml = htmlToElement(
         `<div class ="lobby">
           <h2>${lobby.lobbyName}</h2>
           <h3>${lobby.players.length}/${lobby.maxPlayers}</h3>
           <button id="lobButt${lobby.lobbyId}" type="button" class="btn our-button-secondary">Join</button>
         </div>`);
-    }else{
+    } else {
       lobbyHtml = htmlToElement(
         `<div class ="lobby">
           <h2>${lobby.lobbyName}</h2>
@@ -772,7 +772,7 @@ rhit.VoteController = class {
         });
       } else {
         //TODO: navigate to results page
-        window.location.href = `/gameResult.html?gameId=${game.id}`
+        window.location.href = `/gameResult.html?gameId=${game.id}&lobbyId=${game.lobby}`
       }
 
 
@@ -1252,19 +1252,21 @@ rhit.FBResultsManager = class {
 rhit.ResultsController = class {
   constructor() {
     rhit.fbResultsManager.beginListening(this.updateView.bind(this));
-    rhit.fbResultsManager.getLobby().then((lobby) => {
-      rhit.fbSingleLobbyManager = new rhit.FbSingleLobbyManager(lobby);
-      document.getElementById("exitLobbyButton").onclick = (event) => {
-        console.log("Lobby", rhit.fbResultsManager.lobby);
-        rhit.fbSingleLobbyManager.removeCurrentPlayer()
-        window.location.href = "/lobbyselect.html";
-      }
+    const urlParams = new URLSearchParams(window.location.search)
+    const lobby = urlParams.get("lobbyId")
+    // rhit.fbResultsManager.getLobby().then((lobby) => {
+    rhit.fbSingleLobbyManager = new rhit.FbSingleLobbyManager(lobby);
+    document.getElementById("exitLobbyButton").onclick = (event) => {
+      console.log("Lobby", rhit.fbResultsManager.lobby);
+      rhit.fbSingleLobbyManager.removeCurrentPlayer();
+      window.location.href = "/lobbyselect.html";
+    }
 
-      document.getElementById("playAgainButton").onclick = () => {
-        rhit.fbSingleLobbyManager.deleteGame();
-        window.location.href = `/lobby.html?lobby=${lobby}`
-      }
-    })
+    document.getElementById("playAgainButton").onclick = () => {
+      rhit.fbSingleLobbyManager.deleteGame();
+      window.location.href = `/lobby.html?lobby=${lobby}`
+    }
+    // })
   }
 
   updateView() {
@@ -1388,20 +1390,20 @@ rhit.FbPublicListsManager = class {
     });
     return lists;
   }
-  
-  savePublicList(listId){
-   this._listRef.doc(listId).get().then((list) => {
-      var name =list.get("Name");
-      var categories= list.get("Categories");
-      
+
+  savePublicList(listId) {
+    this._listRef.doc(listId).get().then((list) => {
+      var name = list.get("Name");
+      var categories = list.get("Categories");
+
       return this._listRef.add({
-        Name:name,
-        Owner:rhit.authManager.uid,
-        public:false,
-        Categories:categories
+        Name: name,
+        Owner: rhit.authManager.uid,
+        public: false,
+        Categories: categories
       }).catch(err => console.error(err));
     });
-  
+
     // console.log(list)
   }
 
@@ -1412,35 +1414,35 @@ rhit.MyListController = class {
   constructor() {
     rhit.fbListsManager.beginListening(this.updateView.bind(this));
     document.getElementById("submitNewList").onclick = (event) => {
-    
+
     }
 
     document.getElementById("submitUpdateList").onclick = (event) => {
       console.log("Updating list", rhit.fbListsManager.currentList)
-       $('#myEditListForm').submit();
-     }
-     
-    $('#myCreateListForm').validator('validate').on('submit',  (e) =>{
+      $('#myEditListForm').submit();
+    }
+
+    $('#myCreateListForm').validator('validate').on('submit', (e) => {
       if (e.isDefaultPrevented()) {
-        
+
         console.log("some requried field are not full in things");
       } else {
-      
+
         this.addList();
         $("#createListModal").modal("hide");
       }
-    }) ;
-    
-    $('#myEditListForm').validator().on('submit',  (e) =>{
+    });
+
+    $('#myEditListForm').validator().on('submit', (e) => {
       if (e.isDefaultPrevented()) {
-        
+
         console.log("some requried field are not full in things");
       } else {
-      
+
         this.updateList(rhit.fbListsManager.currentList);
         $("#editListModal").modal("hide");
       }
-    }) ;
+    });
 
 
 
@@ -1471,7 +1473,7 @@ rhit.MyListController = class {
         document.getElementById("editListName").value = list.name;
         document.getElementById("editInputPublic").checked = list.isPublic;
         rhit.fbListsManager._listId = list.id;
-      })      
+      })
     });
 
     $('#deleteModal').on("show.bs.modal", (event) => {
@@ -1487,8 +1489,8 @@ rhit.MyListController = class {
     // if (!rhit.fbListsManager.currentList) {
     console.log(rhit.fbListsManager.customLists);
     const publicListDiv = htmlToElement(`<div id="listColumns"></div>`);
-    
-    if(rhit.fbListsManager.customLists.length > 0){
+
+    if (rhit.fbListsManager.customLists.length > 0) {
       rhit.fbListsManager.customLists.forEach((list) => {
         let categories = htmlToElement(`<ol></ol>`);
         list.categories.forEach((category) => {
@@ -1496,7 +1498,7 @@ rhit.MyListController = class {
           categories.appendChild(cate);
         }
         );
-  
+
         let listcard = htmlToElement(`
             <div class="card" style="width: 18rem;">
                           <div class="card-body">
@@ -1511,9 +1513,9 @@ rhit.MyListController = class {
         listcard.childNodes[1].appendChild(categories);
         publicListDiv.appendChild(listcard)
       });
-  
- 
-    }else{
+
+
+    } else {
       publicListDiv.appendChild(htmlToElement("<p>You don't have any lists. Try adding one!</p>"));
     }
 
@@ -1522,7 +1524,7 @@ rhit.MyListController = class {
     oldList.removeAttribute("id");
     oldList.parentElement.appendChild(publicListDiv);
 
-    
+
   }
 
   addList() {
@@ -1562,29 +1564,29 @@ rhit.MyListController = class {
 rhit.PublicListController = class {
   constructor() {
     rhit.fbPublicListsManager.beginListening(this.updateView.bind(this));
-    $("#savePublicListModal").on('show.bs.modal', (event)=> {
-     var button = $(event.relatedTarget)
+    $("#savePublicListModal").on('show.bs.modal', (event) => {
+      var button = $(event.relatedTarget)
 
       document.querySelector("#saveConfirmBtn").onclick = (event) => {
         rhit.fbPublicListsManager.savePublicList(button.data('listid'));
         $("#savePublicListModal").modal("hide");
       }
-			
-		});
+
+    });
   }
   updateView() {
     // for displaying all public list 
-      console.log(rhit.fbPublicListsManager.getAllPublicLists);
-      const publicListDiv = document.querySelector("#listColumns");
-      rhit.fbPublicListsManager.getAllPublicLists.forEach((list) => {
-        let categories = htmlToElement(`<ol></ol>`);
-        list.categories.forEach((category) => {
-          let cate = htmlToElement(`<li>${category} </li>`)
-          categories.appendChild(cate);
-        }
-        );
-        rhit.fbUsersManager.getUserInfo(list.owner).then((playerModel) => {
-          let listcard = htmlToElement(`<div class="card" style="width: 18rem;">
+    console.log(rhit.fbPublicListsManager.getAllPublicLists);
+    const publicListDiv = document.querySelector("#listColumns");
+    rhit.fbPublicListsManager.getAllPublicLists.forEach((list) => {
+      let categories = htmlToElement(`<ol></ol>`);
+      list.categories.forEach((category) => {
+        let cate = htmlToElement(`<li>${category} </li>`)
+        categories.appendChild(cate);
+      }
+      );
+      rhit.fbUsersManager.getUserInfo(list.owner).then((playerModel) => {
+        let listcard = htmlToElement(`<div class="card" style="width: 18rem;">
           <div class="card-body">
               <div>
                   <h5 class="card-title">List Name: ${list.name}</h5>
@@ -1598,11 +1600,11 @@ rhit.PublicListController = class {
          
           </div>
         </div>`);
-          listcard.childNodes[1].appendChild(categories);
-          publicListDiv.appendChild(listcard)
-        })
+        listcard.childNodes[1].appendChild(categories);
+        publicListDiv.appendChild(listcard)
       })
-    
+    })
+
   }
 
 
@@ -1651,6 +1653,7 @@ rhit.initializePage = function () {
   if (document.getElementById("resultPage")) {
     const urlParams = new URLSearchParams(window.location.search)
     rhit.fbResultsManager = new rhit.FBResultsManager(urlParams.get("gameId"));
+
     new rhit.ResultsController();
 
   }
@@ -1666,7 +1669,7 @@ rhit.initializePage = function () {
     rhit.fbListsManager = new rhit.FbListsManager(urlParams.get("listId"));
     new rhit.MyListController();
     rhit.drawerMenuInit();
-  } 
+  }
   if (document.getElementById("publicListPage")) {
     const urlParams = new URLSearchParams(window.location.search);
     rhit.fbPublicListsManager = new rhit.FbPublicListsManager(urlParams.get("listId"));
@@ -1733,11 +1736,11 @@ rhit.lobbyInit = function () {
 }
 
 rhit.drawerMenuInit = function () {
- 
+
   document.getElementById("avator").src = rhit.authManager.avatar;
   document.getElementById("username").innerHTML = rhit.authManager.username;
-  
-  
+
+
   document.getElementById("menuSignOut").onclick = (event) => {
     rhit.authManager.signOut();
   }
