@@ -1422,6 +1422,7 @@ rhit.MyListController = class {
       } else {
       
         this.addList();
+        $("#createListModal").modal("hide");
       }
     }) ;
     
@@ -1432,6 +1433,7 @@ rhit.MyListController = class {
       } else {
       
         this.updateList(rhit.fbListsManager.currentList);
+        $("#editListModal").modal("hide");
       }
     }) ;
     document.getElementById("submitUpdateList").onclick = (event) => {
@@ -1512,6 +1514,7 @@ rhit.MyListController = class {
   }
 
   addList() {
+    console.log("Hey! I'm adding the list!")
     const owner = rhit.authManager.uid;
     const name = document.getElementById("inputListName").value;
     const isPublic = document.getElementById("inputPublic").checked;
