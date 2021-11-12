@@ -1487,33 +1487,42 @@ rhit.MyListController = class {
     // if (!rhit.fbListsManager.currentList) {
     console.log(rhit.fbListsManager.customLists);
     const publicListDiv = htmlToElement(`<div id="listColumns"></div>`);
-    rhit.fbListsManager.customLists.forEach((list) => {
-      let categories = htmlToElement(`<ol></ol>`);
-      list.categories.forEach((category) => {
-        let cate = htmlToElement(`<li>${category}</li>`)
-        categories.appendChild(cate);
-      }
-      );
-
-      let listcard = htmlToElement(`
-          <div class="card" style="width: 18rem;">
-                        <div class="card-body">
-                            <div>
-                                <h5 id="list-${list.id}"  class="card-title">${list.name}</h5>
-                                <button id="edit-${list.id}" class="btn cardButton" data-listid="${list.id}" data-toggle="modal" data-target="#editListModal">EDIT</button>
-                                <button id="delete-${list.id}" class="btn cardButton" data-listid="${list.id}" data-toggle="modal" data-target="#deleteModal">DELETE</button>
-                            </div>
-                            <div style="height: 3px; background-color:#673AB7"></div>
-                        </div>
-                    </div>`);
-      listcard.childNodes[1].appendChild(categories);
-      publicListDiv.appendChild(listcard)
-    });
+    
+    if(rhit.fbListsManager.customLists.length > 0){
+      rhit.fbListsManager.customLists.forEach((list) => {
+        let categories = htmlToElement(`<ol></ol>`);
+        list.categories.forEach((category) => {
+          let cate = htmlToElement(`<li>${category}</li>`)
+          categories.appendChild(cate);
+        }
+        );
+  
+        let listcard = htmlToElement(`
+            <div class="card" style="width: 18rem;">
+                          <div class="card-body">
+                              <div>
+                                  <h5 id="list-${list.id}"  class="card-title">${list.name}</h5>
+                                  <button id="edit-${list.id}" class="btn cardButton" data-listid="${list.id}" data-toggle="modal" data-target="#editListModal">EDIT</button>
+                                  <button id="delete-${list.id}" class="btn cardButton" data-listid="${list.id}" data-toggle="modal" data-target="#deleteModal">DELETE</button>
+                              </div>
+                              <div style="height: 3px; background-color:#673AB7"></div>
+                          </div>
+                      </div>`);
+        listcard.childNodes[1].appendChild(categories);
+        publicListDiv.appendChild(listcard)
+      });
+  
+ 
+    }else{
+      publicListDiv.appendChild(htmlToElement("<p>You don't have any lists. Try adding one!</p>"));
+    }
 
     const oldList = document.querySelector("#listColumns");
     oldList.hidden = true;
     oldList.removeAttribute("id");
     oldList.parentElement.appendChild(publicListDiv);
+
+    
   }
 
   addList() {
